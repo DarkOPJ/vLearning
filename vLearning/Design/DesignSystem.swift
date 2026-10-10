@@ -38,7 +38,7 @@ enum DS {
 // MARK: - Cross-platform Color helpers
 
 extension Color {
-    static var cardBackground: Color { Color("CardBackground") }
+    static var vlCard: Color { Color("CardBackground") }
 
     static var systemBackground: Color {
         #if os(iOS)
@@ -62,7 +62,7 @@ extension Color {
 extension View {
     func cardStyle() -> some View {
         self
-            .background(Color.cardBackground)
+            .background(Color.vlCard)
             .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
     }
 
