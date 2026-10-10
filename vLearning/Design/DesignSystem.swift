@@ -55,15 +55,28 @@ extension Color {
         Color(nsColor: .controlBackgroundColor)
         #endif
     }
+
+    // macOS-specific chrome colors (fixed dark, independent of system appearance)
+    #if os(macOS)
+    static let macSidebar  = Color(red: 0.13, green: 0.13, blue: 0.145)  // dark
+    static let macMain     = Color(red: 0.075, green: 0.075, blue: 0.082) // very dark graphite
+    static let macCard     = Color(red: 0.20, green: 0.20, blue: 0.22)    // elevated surface on dark bg
+    #endif
 }
 
 // MARK: - View modifiers
 
 extension View {
     func cardStyle() -> some View {
+        #if os(macOS)
+        self
+            .background(Color.macCard)
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
+        #else
         self
             .background(Color.vlCard)
             .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
+        #endif
     }
 
     func sectionHeaderStyle() -> some View {

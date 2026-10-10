@@ -24,6 +24,10 @@ struct LibraryView: View {
                 libraryList
             }
         }
+        #if os(macOS)
+        .background(Color.macSidebar)
+        .environment(\.colorScheme, .dark)
+        #endif
         .navigationTitle("Library")
         #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
@@ -64,6 +68,10 @@ struct LibraryView: View {
             }
         }
         .listStyle(.plain)
+        #if os(macOS)
+        .scrollContentBackground(.hidden)
+        .background(Color.macSidebar)
+        #endif
         .animation(.easeInOut(duration: 0.2), value: filtered.count)
     }
 

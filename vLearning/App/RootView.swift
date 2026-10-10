@@ -35,13 +35,23 @@ private struct DocumentDetailPlaceholder: View {
                     .font(.subheadline)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            #if os(macOS)
+            .background(Color.macMain)
+            .environment(\.colorScheme, .dark)
+            #else
             .background(Color.systemBackground)
+            #endif
         } else {
             ContentUnavailableView(
                 "No Document Selected",
                 systemImage: "book.closed",
                 description: Text("Pick a document from the library to get started.")
             )
+            #if os(macOS)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.macMain)
+            .environment(\.colorScheme, .dark)
+            #endif
         }
     }
 }
