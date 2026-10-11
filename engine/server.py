@@ -11,7 +11,9 @@ backend uses mlx-audio (installed in the lab venv).
 Endpoints (all JSON unless noted):
   GET  /health      -> {"status", "loaded", "busy", "model"}
   POST /load        {"model"?}                       -> {"loaded": true, "seconds"}
-  POST /synthesize  {"text", "instruct"?, "voice"?, "speed"?}
+  POST /synthesize  {"text", "instruct"?, "voice"?, "speed"?, "ref_audio"?, "ref_text"?}
+                    ref_audio is a file path on this Mac; with it the voice is cloned from that
+                    recording (ref_text is its exact transcript) and instruct is ignored.
                     -> audio/wav body; headers X-Audio-Duration, X-Gen-Seconds
   POST /normalize   {"text", "styling"?}             -> {"text", "seconds"}
   POST /unload      -> {"loaded": false}   (unloads every model)
@@ -25,6 +27,7 @@ import gc
 import inspect
 import io
 import json
+import os
 import math
 import sys
 import threading
@@ -59,6 +62,7 @@ class MLXBackend:
     def __init__(self, model_id: str):
         self.model_id = model_id
         self.model = None
+        self._reference = None  # (path, mtime, loaded audio): the same clip serves every sentence
 
     @property
     def loaded(self) -> bool:
@@ -71,9 +75,15 @@ class MLXBackend:
 
         self.model = load_model(self.model_id)
 
-    def synthesize(self, text: str, instruct: str | None, voice: str | None, speed: float):
+    def synthesize(self, text: str, instruct: str | None, voice: str | None, speed: float,
+                   ref_audio: str | None = None, ref_text: str | None = None):
         kwargs = {"text": text, "speed": speed, "lang_code": "en", "verbose": False}
-        if instruct:
+        if ref_audio:
+            # Voice cloning: no instruct, and cfg_scale stays at the model's own default.
+            kwargs["ref_audio"] = self._load_reference(ref_audio)
+            if ref_text:
+                kwargs["ref_text"] = ref_text
+        elif instruct:
             kwargs["instruct"] = instruct
         if voice:
             kwargs["voice"] = voice
@@ -87,8 +97,23 @@ class MLXBackend:
         audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.float32)
         return audio, int(sample_rate)
 
+    def _load_reference(self, path: str):
+        """Loads the reference clip the way mlx-audio's own CLI does, once per file version."""
+        mtime = os.path.getmtime(path)
+        if self._reference and self._reference[:2] == (path, mtime):
+            return self._reference[2]
+        if getattr(self.model, "preserve_ref_audio_path", False) is True:
+            audio = path  # this model reads the file itself
+        else:
+            from mlx_audio.utils import load_audio
+
+            audio = load_audio(path, sample_rate=self.model.sample_rate)
+        self._reference = (path, mtime, audio)
+        return audio
+
     def unload(self) -> None:
         self.model = None
+        self._reference = None
         _release_mlx_memory()
 
 
@@ -108,7 +133,7 @@ class FakeBackend:
         time.sleep(0.2)
         self._loaded = True
 
-    def synthesize(self, text, instruct, voice, speed):
+    def synthesize(self, text, instruct, voice, speed, ref_audio=None, ref_text=None):
         sr = 24000
         seconds = max(0.3, len(text.split()) * 0.35 / max(speed, 0.1))
         t = np.arange(int(sr * seconds)) / sr
@@ -268,7 +293,7 @@ class Engine:
             self.backend.load()
             return time.perf_counter() - start
 
-    def synthesize(self, text: str, instruct, voice, speed: float):
+    def synthesize(self, text: str, instruct, voice, speed: float, ref_audio=None, ref_text=None):
         with self.lock:
             self.busy = True
             try:
@@ -276,7 +301,7 @@ class Engine:
                     self.normalizer.unload()  # keep only one model in memory
                 self.backend.load()  # no-op if already loaded
                 start = time.perf_counter()
-                audio, sr = self.backend.synthesize(text, instruct, voice, speed)
+                audio, sr = self.backend.synthesize(text, instruct, voice, speed, ref_audio, ref_text)
                 return audio, sr, time.perf_counter() - start
             finally:
                 self.busy = False
@@ -334,8 +359,16 @@ def make_handler(engine: Engine, server_ref: dict):
                     if len(text) > MAX_TEXT_CHARS:
                         return self._json(400, {"error": f"text over {MAX_TEXT_CHARS} chars"})
                     speed = float(data.get("speed") or 1.0)
-                    instruct = data.get("instruct", DEFAULT_INSTRUCT)
-                    audio, sr, gen = engine.synthesize(text, instruct, data.get("voice"), speed)
+                    ref_audio = data.get("ref_audio") or None
+                    ref_text = (data.get("ref_text") or "").strip() or None
+                    if ref_audio:
+                        if not os.path.isfile(ref_audio):
+                            return self._json(400, {"error": f"reference audio not found: {ref_audio}"})
+                        instruct = None  # the reference sets the voice
+                    else:
+                        instruct = data.get("instruct", DEFAULT_INSTRUCT)
+                    audio, sr, gen = engine.synthesize(text, instruct, data.get("voice"), speed,
+                                                       ref_audio, ref_text)
                     body = to_wav_bytes(audio, sr)
                     self.send_response(200)
                     self.send_header("Content-Type", "audio/wav")

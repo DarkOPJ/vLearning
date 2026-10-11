@@ -135,10 +135,10 @@ final class GenerationQueue {
 
         do {
             #if os(macOS)
-            let voice = UserDefaults.standard.string(forKey: Self.voiceKey) ?? Self.defaultVoice
-            if doc.audioVoice != voice {
+            let (voice, voiceId) = try Self.currentVoice()
+            if doc.audioVoice != voiceId {
                 discardAllAudio(doc)  // a different voice: everything is regenerated
-                doc.audioVoice = voice
+                doc.audioVoice = voiceId
             }
 
             // Each distinct sentence on a page needs one clip.
@@ -156,15 +156,21 @@ final class GenerationQueue {
 
                 for item in work {
                     try Task.checkCancellation()
-                    let wav = try await EngineController.shared.synthesize(item.sentence, instruct: voice)
+                    var wav = try await EngineController.shared.synthesize(item.sentence, voice: voice)
                     try Task.checkCancellation()
+                    // Now and then Breeze keeps talking past the sentence; try that one once more.
+                    if Self.isRunOn(wav, for: item.sentence) {
+                        wav = try await EngineController.shared.synthesize(item.sentence, voice: voice)
+                        try Task.checkCancellation()
+                    }
 
                     let relative = "pages/\(item.page.pageIndex)/audio/\(Self.clipName(item.sentence)).m4a"
                     let url = DocumentStorage.url(for: doc.id, relativePath: relative)
+                    let clip = wav
                     let duration = try await Task.detached(priority: .userInitiated) {
                         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                                 withIntermediateDirectories: true)
-                        return try AudioEncoder.writeM4A(fromWAV: wav, to: url)
+                        return try AudioEncoder.writeM4A(fromWAV: clip, to: url)
                     }.value
 
                     item.page.sentenceAudio[item.sentence] = relative
@@ -202,6 +208,43 @@ final class GenerationQueue {
 
     private func statusAfterStop(_ doc: VLDocument) -> GenerationStatus {
         doc.hasAllAudio ? .complete : .notStarted
+    }
+
+    // MARK: - Voice
+
+    #if os(macOS)
+    /// The voice to generate with, and an id that changes whenever that voice changes.
+    static func currentVoice() throws -> (EngineController.Voice, String) {
+        switch MyVoice.mode {
+        case .myVoice:
+            guard let reference = MyVoice.reference, let id = MyVoice.identity else {
+                throw GenerationError.noMyVoice
+            }
+            return (.reference(audio: reference.url, transcript: reference.transcript), id)
+        case .described:
+            let instruct = UserDefaults.standard.string(forKey: voiceKey) ?? defaultVoice
+            return (.described(instruct), instruct)
+        }
+    }
+    #endif
+
+    /// The voice audio would be generated with now, for comparing with `VLDocument.audioVoice`.
+    static var currentVoiceId: String? {
+        switch MyVoice.mode {
+        case .myVoice:   MyVoice.identity
+        case .described: UserDefaults.standard.string(forKey: voiceKey) ?? defaultVoice
+        }
+    }
+
+    /// A clip far longer than its sentence could take to say (Breeze ran on).
+    static func isRunOn(_ wav: Data, for sentence: String) -> Bool {
+        // The engine sends 16-bit mono PCM with a 44-byte header; read the rate from the header.
+        guard wav.count > 44 else { return false }
+        let rate = wav[24..<28].enumerated().reduce(0) { $0 | Int($1.element) << (8 * $1.offset) }
+        guard rate > 0 else { return false }
+        let seconds = Double(wav.count - 44) / 2 / Double(rate)
+        let words = sentence.split(whereSeparator: \.isWhitespace).count
+        return seconds > max(8, Double(words) * 1.0)
     }
 
     // MARK: - Audio files
@@ -276,5 +319,12 @@ final class GenerationQueue {
 
 enum GenerationError: LocalizedError {
     case unavailable
-    var errorDescription: String? { "Breeze audio is generated on your Mac." }
+    case noMyVoice
+
+    var errorDescription: String? {
+        switch self {
+        case .unavailable: "Breeze audio is generated on your Mac."
+        case .noMyVoice:   "My Voice is selected but has no recording or transcript. Set it up in Settings › Voice."
+        }
+    }
 }

@@ -9,13 +9,16 @@ struct GenerateView: View {
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \GenerationJob.createdAt, order: .reverse) private var jobs: [GenerationJob]
-    @AppStorage(GenerationQueue.voiceKey) private var voice = GenerationQueue.defaultVoice
+    @AppStorage(GenerationQueue.voiceKey) private var instruct = GenerationQueue.defaultVoice
+    @AppStorage(MyVoice.modeKey) private var voiceMode: MyVoice.Mode = .described
 
     private var queue: GenerationQueue { .shared }
     private var job: GenerationJob? { jobs.first { $0.documentId == document.id } }
     private var activeJob: GenerationJob? { job.flatMap { $0.isActive ? $0 : nil } }
     private var missing: Int { document.sentenceCount - document.audioReadyCount }
-    private var voiceChanged: Bool { document.audioVoice != nil && document.audioVoice != voice }
+    private var voiceId: String? { _ = instruct; _ = voiceMode; return GenerationQueue.currentVoiceId }
+    private var voiceChanged: Bool { document.audioVoice != nil && document.audioVoice != voiceId }
+    private var myVoiceMissing: Bool { voiceMode == .myVoice && MyVoice.reference == nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -70,8 +73,15 @@ struct GenerateView: View {
             Divider()
             VStack(alignment: .leading, spacing: DS.Space.xs) {
                 Text("Voice").font(.system(.caption, weight: .semibold)).foregroundStyle(.secondary)
-                Text(voice).font(.callout)
-                Text("Change the voice in Settings.").font(.caption).foregroundStyle(.secondary)
+                Text(voiceMode == .myVoice ? "My Voice (cloned from your recording)" : instruct).font(.callout)
+                if myVoiceMissing {
+                    Label("My Voice needs a recording and its transcript. Set it up in Settings › Voice.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                } else {
+                    Text("Change the voice in Settings.").font(.caption).foregroundStyle(.secondary)
+                }
             }
             if voiceChanged {
                 notice("The voice changed since this audio was made, so all of it will be generated again.",
@@ -140,7 +150,7 @@ struct GenerateView: View {
                     Button(startLabel) { queue.enqueue(document) }
                         .buttonStyle(.borderedProminent)
                         .keyboardShortcut(.defaultAction)
-                        .disabled(missing == 0 && !voiceChanged)
+                        .disabled((missing == 0 && !voiceChanged) || myVoiceMissing)
                 }
             }
         }

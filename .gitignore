@@ -7,3 +7,6 @@ bench_out/
 xcuserdata/
 DerivedData/
 build/
+
+# Personal voice recordings (the app keeps its copy in Application Support)
+breeze-reference/

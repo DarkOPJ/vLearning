@@ -8,7 +8,6 @@ struct SettingsView: View {
     #if os(macOS)
     @AppStorage(EngineController.pythonPathKey) private var pythonPath: String = EngineController.defaultPythonPath
     #endif
-    @AppStorage(GenerationQueue.voiceKey) private var breezeInstruct: String = GenerationQueue.defaultVoice
 
     var body: some View {
         NavigationStack {
@@ -57,16 +56,7 @@ struct SettingsView: View {
 
                 SyncSettingsSection()
 
-                Section("Voice (Breeze — Mac only)") {
-                    VStack(alignment: .leading, spacing: DS.Space.s) {
-                        Text("Voice description")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        TextEditor(text: $breezeInstruct)
-                            .font(.body)
-                            .frame(minHeight: 72)
-                    }
-                }
+                VoiceSettingsSection()
 
                 Section("About") {
                     LabeledContent("Version", value: "1.0")

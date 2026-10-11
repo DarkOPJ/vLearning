@@ -101,9 +101,24 @@ final class EngineController {
         return out
     }
 
+    /// The voice Breeze speaks with: a written description, or cloned from a recording.
+    enum Voice {
+        case described(String)
+        case reference(audio: URL, transcript: String)
+    }
+
     /// Speaks one sentence with Breeze. Returns WAV data. Loads Breeze on first use.
-    func synthesize(_ text: String, instruct: String, speed: Double = 1.0) async throws -> Data {
-        try await post("/synthesize", body: ["text": text, "instruct": instruct, "speed": speed], timeout: 600)
+    func synthesize(_ text: String, voice: Voice, speed: Double = 1.0) async throws -> Data {
+        var body: [String: Any] = ["text": text, "speed": speed]
+        switch voice {
+        case .described(let instruct):
+            body["instruct"] = instruct
+        case .reference(let audio, let transcript):
+            // No instruct: the recording sets the voice.
+            body["ref_audio"] = audio.path
+            body["ref_text"] = transcript
+        }
+        return try await post("/synthesize", body: body, timeout: 600)
     }
 
     // MARK: - HTTP
