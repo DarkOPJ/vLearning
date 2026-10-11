@@ -212,13 +212,37 @@ final class GenerationQueue {
     }
 
     private func discardAllAudio(_ doc: VLDocument) {
+        let fm = FileManager.default
         for page in doc.pages {
             for path in page.sentenceAudio.values {
-                try? FileManager.default.removeItem(at: DocumentStorage.url(for: doc.id, relativePath: path))
+                try? fm.removeItem(at: DocumentStorage.url(for: doc.id, relativePath: path))
             }
             page.sentenceAudio = [:]
             page.sentenceDurations = [:]
+            // Leftovers: clips no longer referenced, and the old one-file-per-page audio.
+            try? fm.removeItem(at: DocumentStorage.pageDirectory(for: doc.id, pageIndex: page.pageIndex)
+                .appendingPathComponent("audio", isDirectory: true))
+            if let path = page.audioFilePath {
+                try? fm.removeItem(at: DocumentStorage.url(for: doc.id, relativePath: path))
+                page.audioFilePath = nil
+            }
         }
+        try? fm.removeItem(at: DocumentStorage.directory(for: doc.id).appendingPathComponent("audio", isDirectory: true))
+    }
+
+    /// Deletes a document's generated audio only. Its text, Clean Up edits, OCR, sentences and
+    /// reading position stay, so it can be generated again without redoing any of that.
+    /// Returns false while the document has a queued or running job.
+    @discardableResult
+    func deleteAudio(for doc: VLDocument) -> Bool {
+        guard activeJob(for: doc.id) == nil else { return false }
+        if AudioPlayer.shared.document?.id == doc.id { AudioPlayer.shared.close() }
+        discardAllAudio(doc)
+        doc.audioVoice = nil
+        doc.generationStatus = .notStarted
+        doc.generationFraction = 0
+        doc.generationProgress = 0
+        return true
     }
 
     /// Deletes clips for sentences that were edited away.

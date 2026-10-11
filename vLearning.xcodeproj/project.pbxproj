@@ -14,6 +14,7 @@
 		07067AD391587C2BCE37EEFB /* ReviewPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */; };
 		07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7F6709524488EE4C96546 /* LibraryView.swift */; };
 		0AF9EBF75469BB0EDAC7D1D6 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B350395764DC4657BC32B36 /* AudioPlayer.swift */; };
+		0C8656EAAF3C505368768445 /* DeleteAudioConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76BE7A7F912950B0FEB22447 /* DeleteAudioConfirmation.swift */; };
 		11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
 		136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		15046BD8A296DE05365982E8 /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
@@ -49,6 +50,7 @@
 		5B5C51CEFFC2185748BB9AF5 /* VLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */; };
 		5C25DE0980087C47977BE2BE /* DocumentPagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5ED18B2E2392879EC8F2E5B /* DocumentPagesView.swift */; };
 		5D1FC6B94E4C2F848C39DDCC /* EmptyLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEE297AE3D940D10CF80452 /* EmptyLibraryView.swift */; };
+		65FFDFDE3447DE231C75E7E8 /* DeleteAudioConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76BE7A7F912950B0FEB22447 /* DeleteAudioConfirmation.swift */; };
 		6756FFAB56BF0AD5E83749E6 /* NowPlayingBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B523FADECD26DDFDA2E4CA09 /* NowPlayingBar.swift */; };
 		6B4AB08CCADC24C7AD73C533 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BE3E43E4B7A597063BC3A1 /* RootView.swift */; };
 		6DB1D7D28766271A1718DA8A /* ZIPReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205ED3C86A1A3C18666AAA71 /* ZIPReader.swift */; };
@@ -138,6 +140,7 @@
 		6E78A97C6B5A09D6663046FE /* PPTXExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTXExtractor.swift; sourceTree = "<group>"; };
 		729E0C42F247232E0796B23B /* AudioEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEncoder.swift; sourceTree = "<group>"; };
 		749416CE3C531FEDB120AEC0 /* server.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = server.py; sourceTree = "<group>"; };
+		76BE7A7F912950B0FEB22447 /* DeleteAudioConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAudioConfirmation.swift; sourceTree = "<group>"; };
 		86395D495B5F84BA3BD61953 /* TextRemover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRemover.swift; sourceTree = "<group>"; };
 		8F13A9B83F506E213B265D56 /* OOXMLTextParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OOXMLTextParser.swift; sourceTree = "<group>"; };
 		974A9DB8ABC0CD0DF856125F /* iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "iOS-Info.plist"; sourceTree = "<group>"; };
@@ -176,6 +179,7 @@
 		04250A42F232649A76A4C83A /* Document */ = {
 			isa = PBXGroup;
 			children = (
+				76BE7A7F912950B0FEB22447 /* DeleteAudioConfirmation.swift */,
 				E5ED18B2E2392879EC8F2E5B /* DocumentPagesView.swift */,
 				2026A568681DFD36B973D79F /* RenderStatusView.swift */,
 			);
@@ -546,6 +550,7 @@
 				D4F2B1F9E1D22F04CC4C8FA2 /* BackgroundTasksView.swift in Sources */,
 				1893E297E4204A1DCF4FECCD /* CleanUpView.swift in Sources */,
 				ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */,
+				65FFDFDE3447DE231C75E7E8 /* DeleteAudioConfirmation.swift in Sources */,
 				50E4FCDC543A8628A0E40514 /* DesignSystem.swift in Sources */,
 				2CD858C899D53E99EBC28A29 /* DocumentCard.swift in Sources */,
 				9699CFCBA59982FB617DD9C7 /* DocumentImporter.swift in Sources */,
@@ -600,6 +605,7 @@
 				268B7957B990D1031B03CA10 /* BackgroundTasksView.swift in Sources */,
 				DAA78948117F8560836A208C /* CleanUpView.swift in Sources */,
 				8E921A85EC3AF0AC18B1ABF5 /* DOCXExtractor.swift in Sources */,
+				0C8656EAAF3C505368768445 /* DeleteAudioConfirmation.swift in Sources */,
 				7895737D581519B21E220464 /* DesignSystem.swift in Sources */,
 				E3CD6792F42F66FB8A60DBC0 /* DocumentCard.swift in Sources */,
 				018937AF2D8160C5C1F1360C /* DocumentImporter.swift in Sources */,

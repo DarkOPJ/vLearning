@@ -31,6 +31,15 @@ enum DocumentStorage {
         try FileManager.default.removeItem(at: dir)
     }
 
+    /// Size of a document's generated audio clips.
+    @MainActor
+    static func audioSize(for doc: VLDocument) -> Int64 {
+        doc.pages.flatMap { $0.sentenceAudio.values }.reduce(into: Int64(0)) { total, path in
+            let url = url(for: doc.id, relativePath: path)
+            total += Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+    }
+
     static func totalSize(for id: UUID) -> Int64 {
         let dir = directory(for: id)
         guard let enumerator = FileManager.default.enumerator(

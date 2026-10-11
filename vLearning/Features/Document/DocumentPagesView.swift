@@ -16,6 +16,7 @@ struct DocumentPagesView: View {
     @State private var showRemoveEverywhere = false
     @State private var showGenerate = false
     @State private var showReader = false
+    @State private var deleteAudioFor: VLDocument?
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", sentences = "Sentences", original = "Original"
@@ -97,6 +98,14 @@ struct DocumentPagesView: View {
                 }
                 .help("Generate the audio with Breeze")
             }
+            if document.hasGeneratedAudio {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { deleteAudioFor = document } label: {
+                        Label("Delete Audio", systemImage: "speaker.slash")
+                    }
+                    .help("Delete the generated audio only; the text and your edits stay")
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button { showPrepare = true } label: {
                     Label("Prepare", systemImage: "text.badge.checkmark")
@@ -133,6 +142,7 @@ struct DocumentPagesView: View {
             }
         }
         .quickLookPreview($quickLookURL)
+        .deleteAudioConfirmation(for: $deleteAudioFor)
         .navigationDestination(isPresented: $showCleanUp) {
             CleanUpView(document: document)
         }

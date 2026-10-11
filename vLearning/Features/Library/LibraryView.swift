@@ -13,6 +13,7 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var isImporting = false
     @State private var importError: String?
+    @State private var deleteAudioFor: VLDocument?
 
     private var filtered: [VLDocument] {
         guard !searchText.isEmpty else { return documents }
@@ -70,6 +71,7 @@ struct LibraryView: View {
         ) { result in
             handleImport(result)
         }
+        .deleteAudioConfirmation(for: $deleteAudioFor)
         .sheet(isPresented: $showTasks) {
             BackgroundTasksView()
         }
@@ -91,6 +93,11 @@ struct LibraryView: View {
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                             .contextMenu {
+                                if doc.hasGeneratedAudio {
+                                    Button("Delete Audio Only", systemImage: "speaker.slash") {
+                                        deleteAudioFor = doc
+                                    }
+                                }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     delete(doc)
                                 }
