@@ -533,9 +533,11 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					597A223D0319BC06CF07F3FB = {
+						DevelopmentTeam = P33PLUGL2Z;
 						ProvisioningStyle = Automatic;
 					};
 					5E7BF4FE6D62337B5AAD21E5 = {
+						DevelopmentTeam = P33PLUGL2Z;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -766,6 +768,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = P33PLUGL2Z;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -844,6 +847,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = P33PLUGL2Z;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
