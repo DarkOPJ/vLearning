@@ -10,15 +10,16 @@ struct GenerateView: View {
 
     @Query(sort: \GenerationJob.createdAt, order: .reverse) private var jobs: [GenerationJob]
     @AppStorage(GenerationQueue.voiceKey) private var instruct = GenerationQueue.defaultVoice
-    @AppStorage(MyVoice.modeKey) private var voiceMode: MyVoice.Mode = .described
+    @AppStorage(VoiceLibrary.modeKey) private var voiceMode: VoiceLibrary.Mode = .described
+    private var library: VoiceLibrary { .shared }
 
     private var queue: GenerationQueue { .shared }
     private var job: GenerationJob? { jobs.first { $0.documentId == document.id } }
     private var activeJob: GenerationJob? { job.flatMap { $0.isActive ? $0 : nil } }
     private var missing: Int { document.sentenceCount - document.audioReadyCount }
-    private var voiceId: String? { _ = instruct; _ = voiceMode; return GenerationQueue.currentVoiceId }
+    private var voiceId: String? { _ = instruct; _ = voiceMode; _ = library.selected; return GenerationQueue.currentVoiceId }
     private var voiceChanged: Bool { document.audioVoice != nil && document.audioVoice != voiceId }
-    private var myVoiceMissing: Bool { voiceMode == .myVoice && MyVoice.reference == nil }
+    private var myVoiceMissing: Bool { voiceMode == .cloned && library.selected == nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -73,9 +74,9 @@ struct GenerateView: View {
             Divider()
             VStack(alignment: .leading, spacing: DS.Space.xs) {
                 Text("Voice").font(.system(.caption, weight: .semibold)).foregroundStyle(.secondary)
-                Text(voiceMode == .myVoice ? "My Voice (cloned from your recording)" : instruct).font(.callout)
+                Text(voiceMode == .cloned ? "\(library.selected?.name ?? "No voice") (cloned from a recording)" : instruct).font(.callout)
                 if myVoiceMissing {
-                    Label("My Voice needs a recording and its transcript. Set it up in Settings › Voice.",
+                    Label("Add a voice recording and its exact text in Settings › Voice.",
                           systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
                         .foregroundStyle(.orange)

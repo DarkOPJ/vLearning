@@ -29,14 +29,13 @@ and PDF (digital, scanned, hybrid) aloud, with sentence highlighting. English on
 - Mac: **Breeze-TTS-2 (mlx-community/Breeze-TTS-2-mlx-8bit)** via Python mlx-audio, in `engine/`.
   Default voice: `--instruct "A calm, warm male narrator with a clear, steady pace, like an audiobook reader."`
   The user liked it.
-- **My Voice** (voice cloning): Settings › Voice › My Voice, record or import a clip and enter its exact
-  transcript. Stored as 24 kHz mono WAV + transcript.txt in `~/Library/Application Support/com.darkopj.vlearning/voice/`.
+- **Cloned voices** (`VoiceLibrary`): Settings › Voice › Cloned lists voices; add one from a .wav (or any
+  audio) or a recording plus its exact text, then select, play, rename, edit text, delete. Stored as 24 kHz
+  mono WAV in `~/Library/Application Support/com.darkopj.vlearning/voices/<id>.wav` + `voices.json`.
   The engine's /synthesize takes `ref_audio` (path) + `ref_text`; with a reference, no instruct is sent and
-  cfg_scale isn't overridden. The engine caches the loaded reference. Clips that run far past their sentence
-  are regenerated once. `VLDocument.audioVoice` holds the voice id, so changing the voice regenerates audio.
-- The engine **does not start with the app**. It starts on "Ready to generate". The UI shows a spinner,
-  and cancel moves the job to a Background Tasks list. Tasks queue, with **one generation at a time**.
-  When the queue is empty, the engine shuts down and fully unloads the model.
+  cfg_scale isn't overridden. The engine caches the loaded reference. Clips that run far past their
+  sentence are regenerated once. `VLDocument.audioVoice` holds the voice id (voice + recording + text),
+  so changing the voice regenerates audio. First voice: "My Voice" (the user's 25.8 s recording).
 - iPhone: Apple's on-device voices (AVSpeechSynthesizer) standalone. On the same Wi-Fi, it sends jobs
   to the Mac engine for Breeze audio.
 - KittenTTS 2 was dropped (1.7B, needs PyTorch).

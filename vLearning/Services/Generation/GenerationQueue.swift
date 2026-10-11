@@ -215,12 +215,11 @@ final class GenerationQueue {
     #if os(macOS)
     /// The voice to generate with, and an id that changes whenever that voice changes.
     static func currentVoice() throws -> (EngineController.Voice, String) {
-        switch MyVoice.mode {
-        case .myVoice:
-            guard let reference = MyVoice.reference, let id = MyVoice.identity else {
-                throw GenerationError.noMyVoice
-            }
-            return (.reference(audio: reference.url, transcript: reference.transcript), id)
+        let library = VoiceLibrary.shared
+        switch library.mode {
+        case .cloned:
+            guard let voice = library.selected else { throw GenerationError.noClonedVoice }
+            return (.reference(audio: library.audioURL(voice), transcript: voice.transcript), library.identity(voice))
         case .described:
             let instruct = UserDefaults.standard.string(forKey: voiceKey) ?? defaultVoice
             return (.described(instruct), instruct)
@@ -230,9 +229,10 @@ final class GenerationQueue {
 
     /// The voice audio would be generated with now, for comparing with `VLDocument.audioVoice`.
     static var currentVoiceId: String? {
-        switch MyVoice.mode {
-        case .myVoice:   MyVoice.identity
-        case .described: UserDefaults.standard.string(forKey: voiceKey) ?? defaultVoice
+        let library = VoiceLibrary.shared
+        switch library.mode {
+        case .cloned:    return library.selected.map(library.identity)
+        case .described: return UserDefaults.standard.string(forKey: voiceKey) ?? defaultVoice
         }
     }
 
@@ -319,12 +319,12 @@ final class GenerationQueue {
 
 enum GenerationError: LocalizedError {
     case unavailable
-    case noMyVoice
+    case noClonedVoice
 
     var errorDescription: String? {
         switch self {
         case .unavailable: "Breeze audio is generated on your Mac."
-        case .noMyVoice:   "My Voice is selected but has no recording or transcript. Set it up in Settings › Voice."
+        case .noClonedVoice: "A cloned voice is selected but none is set up. Add one in Settings › Voice."
         }
     }
 }
