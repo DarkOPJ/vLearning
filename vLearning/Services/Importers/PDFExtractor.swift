@@ -36,7 +36,7 @@ enum PDFExtractor {
     private static let previewWidth: CGFloat = 1500
 
     /// Renders the whole page; used as the "original" view and, for scanned pages, as the OCR source.
-    private static func renderPreview(_ page: PDFPage) -> Data? {
+    static func renderPreview(_ page: PDFPage) -> Data? {
         let bounds = page.bounds(for: .cropBox)
         guard bounds.width > 0, bounds.height > 0 else { return nil }
         let rotated = page.rotation % 180 != 0

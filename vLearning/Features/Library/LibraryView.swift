@@ -151,6 +151,8 @@ struct LibraryView: View {
             do {
                 let doc = try await DocumentImporter.importDocument(from: url, into: context)
                 selectedDocument = doc
+                // PowerPoint/Word: make the "Original" page images in the background.
+                if PageRenderService.shared.needsRender(doc) { PageRenderService.shared.render(doc) }
             } catch {
                 importError = error.localizedDescription
             }

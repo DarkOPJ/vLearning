@@ -34,6 +34,9 @@ final class DocumentPage {
     var sentenceAudio: [String: String] = [:]      // sentence text → relative .m4a path
     var sentenceDurations: [String: Double] = [:]  // sentence text → seconds
 
+    /// First rendered page (VLDocument.renderedPagePaths) showing this page's content. PPTX/DOCX only.
+    var renderedStart: Int?
+
     var document: VLDocument?
 
     /// The four text sections of a page, in the order they're read.

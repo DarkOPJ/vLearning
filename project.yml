@@ -82,11 +82,14 @@ targets:
         com.apple.security.app-sandbox: false
         com.apple.security.files.user-selected.read-write: true
         com.apple.security.network.client: true
+        # Keynote/Pages render PowerPoint and Word pages when LibreOffice isn't installed.
+        com.apple.security.automation.apple-events: true
     settings:
       base:
         SDKROOT: macosx
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_ENTITLEMENTS: vLearning/macOS.entitlements
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: "vLearning uses Keynote or Pages to show PowerPoint and Word pages as they look in the original."
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
         COMBINE_HIDPI_IMAGES: YES

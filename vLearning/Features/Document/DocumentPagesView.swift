@@ -22,8 +22,11 @@ struct DocumentPagesView: View {
         var id: Self { self }
     }
 
-    /// Original is only available for PDFs (rendered pages).
-    private var modes: [Mode] { document.kind == .pdf ? Mode.allCases : [.text, .sentences] }
+    /// PowerPoint/Word pages still to render (or failed), shown above the pages in Original.
+    private var showsRenderStatus: Bool {
+        document.kind != .pdf && (!document.hasOriginalPages || document.renderError != nil
+                                  || PageRenderService.shared.rendering.contains(document.id))
+    }
 
     private var sortedPages: [DocumentPage] {
         document.pages.sorted { $0.pageIndex < $1.pageIndex }
@@ -39,6 +42,17 @@ struct DocumentPagesView: View {
                 header
                 if hasOCRCandidates && !document.pages.contains(where: { !$0.ocrResults.isEmpty }) {
                     ocrBanner
+                }
+                if mode == .original && showsRenderStatus {
+                    RenderStatusView(document: document)
+                } else if mode == .original && document.kind != .pdf && PageRenderService.isAvailable {
+                    HStack {
+                        Spacer()
+                        Button("Render Pages Again") { PageRenderService.shared.render(document) }
+                            .buttonStyle(.borderless)
+                            .font(.callout)
+                            .help("Make the page images again, e.g. after installing LibreOffice")
+                    }
                 }
                 ForEach(sortedPages) { page in
                     PageCard(
@@ -66,10 +80,10 @@ struct DocumentPagesView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Picker("View", selection: $mode) {
-                    ForEach(modes) { Text($0.rawValue).tag($0) }
+                    ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: document.kind == .pdf ? 270 : 180)
+                .frame(width: 270)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button { showReader = true } label: {
@@ -149,6 +163,11 @@ struct DocumentPagesView: View {
         }
         .onChange(of: AudioPlayer.shared.openReaderRequest) { openReaderIfRequested() }
         .onChange(of: document.id) { mode = .text }
+        .onChange(of: mode) { _, newMode in
+            if newMode == .original && PageRenderService.shared.needsRender(document) {
+                PageRenderService.shared.render(document)
+            }
+        }
     }
 
     /// The mini player asked for this document's reader.
@@ -244,10 +263,8 @@ private struct PageCard: View {
                     editContent
                 } else if mode == .sentences {
                     sentencesContent
-                } else if mode == .original, let preview = page.previewImagePath {
-                    StoredImage(url: url(preview), maxPixelSize: 1600)
-                        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
-                        .onTapGesture { onImageTap(url(preview)) }
+                } else if mode == .original {
+                    originalContent
                 } else {
                     textContent
                 }
@@ -264,6 +281,27 @@ private struct PageCard: View {
             // Switching views ends editing; keep what was typed in the sentence draft.
             if isEditing && oldMode == .sentences { commitSentences() }
             isEditing = false
+        }
+    }
+
+    /// The rendered page(s) showing this page's content.
+    @ViewBuilder
+    private var originalContent: some View {
+        let paths: [String] = page.document.flatMap { doc in
+            doc.originalRange(for: page).map { range in range.map { doc.originalPagePaths[$0] } }
+        }?.filter { !$0.isEmpty } ?? []
+        if paths.isEmpty {
+            Text("No rendered page yet.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        } else {
+            VStack(spacing: DS.Space.m) {
+                ForEach(paths, id: \.self) { path in
+                    StoredImage(url: url(path), maxPixelSize: 1600)
+                        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
+                        .onTapGesture { onImageTap(url(path)) }
+                }
+            }
         }
     }
 

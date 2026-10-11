@@ -81,6 +81,10 @@ final class VLDocument {
     var originalFileBookmark: Data?  // security-scoped bookmark for re-access
     var audioVoice: String?          // voice description the audio was generated with
     var generationFraction: Double = 0  // 0...1 while generating
+    // PPTX/DOCX rendered to page images on the Mac (PDFs use each page's preview instead).
+    var renderedPagePaths: [String] = []   // relative .jpg paths, one per rendered page
+    var renderedPageTexts: [String] = []   // each rendered page's words, lowercased, for matching
+    var renderError: String?
 
     @Relationship(deleteRule: .cascade, inverse: \DocumentPage.document)
     var pages: [DocumentPage]

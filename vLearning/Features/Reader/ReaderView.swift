@@ -23,10 +23,24 @@ struct ReaderView: View {
         return (document.currentPageIndex, document.currentSentenceIndex)
     }
 
+    /// The sentence being read (or where the document was left off).
+    private var currentSentence: String? {
+        guard let page = currentPage, page.sentences.indices.contains(current.index) else { return nil }
+        return page.sentences[current.index]
+    }
+
+    private var currentPage: DocumentPage? { document.pages.first { $0.pageIndex == current.page } }
+
+    /// The rendered page showing the current sentence.
+    private var followedOriginal: Int? {
+        currentPage.flatMap { document.originalIndex(for: $0, sentence: currentSentence) }
+    }
+
     var body: some View {
         Group {
             if mode == .original {
-                OriginalPageView(document: document, page: $originalPage, current: current)
+                OriginalPageView(document: document, page: $originalPage,
+                                 followed: followedOriginal, sentence: currentSentence)
             } else {
                 sentences
             }
@@ -44,25 +58,32 @@ struct ReaderView: View {
             PlayerControls(document: document)
         }
         .toolbar {
-            if document.kind == .pdf {
-                ToolbarItem(placement: .principal) {
-                    Picker("View", selection: $mode) {
-                        ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 180)
+            ToolbarItem(placement: .principal) {
+                Picker("View", selection: $mode) {
+                    ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
                 }
+                .pickerStyle(.segmented)
+                .frame(width: 180)
             }
         }
         .onAppear {
             player.readerDocumentId = document.id
             if !isActive || !player.isPlaying { player.load(document) }
-            originalPage = current.page
+            originalPage = followedOriginal ?? 0
         }
         .onDisappear {
             if player.readerDocumentId == document.id { player.readerDocumentId = nil }
         }
-        .onChange(of: current.page) { _, page in originalPage = page }
+        // Turn the page as reading moves on.
+        .onChange(of: followedOriginal) { _, index in
+            if let index { withAnimation(.easeInOut(duration: 0.3)) { originalPage = index } }
+        }
+        .onChange(of: mode) { _, newMode in
+            if newMode == .original {
+                originalPage = followedOriginal ?? originalPage
+                if PageRenderService.shared.needsRender(document) { PageRenderService.shared.render(document) }
+            }
+        }
     }
 
     // MARK: - Text
@@ -174,74 +195,83 @@ private struct SentenceRow: View {
 
 // MARK: - Original page
 
-/// The rendered PDF page. Follows the page being read; arrows look at other pages.
+/// The page as it looks in the original file. Follows the sentence being read;
+/// the arrows look at other pages, and Back to Reading returns.
 private struct OriginalPageView: View {
     let document: VLDocument
     @Binding var page: Int
-    let current: (page: Int, index: Int)
+    let followed: Int?
+    let sentence: String?
 
-    private var pages: [DocumentPage] { document.pages.sorted { $0.pageIndex < $1.pageIndex } }
-    private var shown: DocumentPage? { pages.first { $0.pageIndex == page } ?? pages.first }
-
-    private var currentSentence: String? {
-        guard let p = pages.first(where: { $0.pageIndex == current.page }),
-              p.sentences.indices.contains(current.index) else { return nil }
-        return p.sentences[current.index]
-    }
+    private var paths: [String] { document.originalPagePaths }
+    private var noun: String { document.kind == .pptx ? "Slide" : "Page" }
 
     var body: some View {
         VStack(spacing: DS.Space.m) {
-            HStack {
-                Button { step(-1) } label: { Image(systemName: "chevron.left") }
-                    .disabled(page <= (pages.first?.pageIndex ?? 0))
-                Spacer()
-                Text("Page \(page + 1) of \(pages.count)")
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                if page != current.page {
-                    Button("Back to Reading") { page = current.page }
-                        .buttonStyle(.borderless)
-                        .font(.subheadline)
-                }
-                Spacer()
-                Button { step(1) } label: { Image(systemName: "chevron.right") }
-                    .disabled(page >= (pages.last?.pageIndex ?? 0))
-            }
-            .buttonStyle(.bordered)
-            .padding(.horizontal, DS.Space.l)
-
-            if let path = shown?.previewImagePath {
-                StoredImage(url: DocumentStorage.url(for: document.id, relativePath: path), maxPixelSize: 2000)
-                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
-                    .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
-                    .padding(.horizontal, DS.Space.l)
-                    .frame(maxHeight: .infinity)
-                    .id(path)
-            } else {
-                ContentUnavailableView("No Page Image", systemImage: "doc")
-                    .frame(maxHeight: .infinity)
-            }
-
-            if page == current.page, let currentSentence {
-                Text(currentSentence)
-                    .font(.system(.body, design: .serif))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(3)
-                    .padding(.horizontal, DS.Space.l)
-                    .padding(.vertical, DS.Space.s)
+            if document.kind != .pdf && (!document.hasOriginalPages || document.renderError != nil
+                                         || PageRenderService.shared.rendering.contains(document.id)) {
+                RenderStatusView(document: document)
                     .frame(maxWidth: 700)
-                    .background(Color.accentColor.opacity(0.18), in: RoundedRectangle(cornerRadius: DS.Radius.s))
                     .padding(.horizontal, DS.Space.l)
-                    .animation(.easeInOut(duration: 0.25), value: currentSentence)
+            }
+
+            if document.hasOriginalPages {
+                pager
+                pageImage
+                if page == followed, let sentence {
+                    Text(sentence)
+                        .font(.system(.body, design: .serif))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .padding(.horizontal, DS.Space.l)
+                        .padding(.vertical, DS.Space.s)
+                        .frame(maxWidth: 700)
+                        .background(Color.accentColor.opacity(0.18), in: RoundedRectangle(cornerRadius: DS.Radius.s))
+                        .padding(.horizontal, DS.Space.l)
+                        .animation(.easeInOut(duration: 0.25), value: sentence)
+                }
+            } else {
+                Spacer()
             }
         }
         .padding(.vertical, DS.Space.m)
     }
 
-    private func step(_ delta: Int) {
-        guard let i = pages.firstIndex(where: { $0.pageIndex == page }),
-              pages.indices.contains(i + delta) else { return }
-        page = pages[i + delta].pageIndex
+    private var pager: some View {
+        HStack {
+            Button { page = max(page - 1, 0) } label: { Image(systemName: "chevron.left") }
+                .disabled(page <= 0)
+            Spacer()
+            Text("\(noun) \(page + 1) of \(paths.count)")
+                .font(.subheadline.monospacedDigit())
+                .foregroundStyle(.secondary)
+            if let followed, page != followed {
+                Button("Back to Reading") { page = followed }
+                    .buttonStyle(.borderless)
+                    .font(.subheadline)
+            }
+            Spacer()
+            Button { page = min(page + 1, paths.count - 1) } label: { Image(systemName: "chevron.right") }
+                .disabled(page >= paths.count - 1)
+        }
+        .buttonStyle(.bordered)
+        .padding(.horizontal, DS.Space.l)
+    }
+
+    @ViewBuilder
+    private var pageImage: some View {
+        if paths.indices.contains(page), !paths[page].isEmpty {
+            StoredImage(url: DocumentStorage.url(for: document.id, relativePath: paths[page]), maxPixelSize: 2000)
+                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+                .padding(.horizontal, DS.Space.l)
+                .frame(maxHeight: .infinity)
+                .id(paths[page])
+                .transition(.opacity)
+        } else {
+            ContentUnavailableView("No Page Image", systemImage: "doc")
+                .frame(maxHeight: .infinity)
+        }
     }
 }
 

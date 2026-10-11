@@ -66,4 +66,7 @@ and dark mode.
    saves the position in `currentPageIndex/currentSentenceIndex`, lock-screen controls via MediaPlayer,
    iOS background audio via `UIBackgroundModes: audio` in `vLearning/iOS-Info.plist`; `ReaderView`,
    `NowPlayingBar` at the bottom of the window)
+   Original view for PPTX/DOCX: `PageRenderService` converts to PDF on the Mac (LibreOffice if installed,
+   else Keynote/Pages via AppleScript), saves `rendered/<i>.jpg`, and maps pages/sentences to rendered
+   pages by their words (Word reflows, so page counts can differ). Runs after import and on demand.
 9. Wi-Fi sync
