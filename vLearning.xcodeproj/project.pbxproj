@@ -12,11 +12,13 @@
 		049AD101A293C12FA82AE86F /* vLearningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32560B5EE019AD23C009ED69 /* vLearningApp.swift */; };
 		07067AD391587C2BCE37EEFB /* ReviewPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */; };
 		07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7F6709524488EE4C96546 /* LibraryView.swift */; };
+		0AF9EBF75469BB0EDAC7D1D6 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B350395764DC4657BC32B36 /* AudioPlayer.swift */; };
 		11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
 		136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		15046BD8A296DE05365982E8 /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
 		1893E297E4204A1DCF4FECCD /* CleanUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */; };
 		1A0F8D038AECFB73277B9E5D /* VLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */; };
+		1DD94979D6677A3B85ADAC6A /* NowPlayingBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B523FADECD26DDFDA2E4CA09 /* NowPlayingBar.swift */; };
 		1EEBBD69B90AFEE985A6A7AC /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
 		1F9EA11D335FF21C10F38C03 /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
 		21D9FE70CB0988A3C47E2905 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07979DBDFDD453C34BEC8407 /* Notifier.swift */; };
@@ -45,6 +47,7 @@
 		5B5C51CEFFC2185748BB9AF5 /* VLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */; };
 		5C25DE0980087C47977BE2BE /* DocumentPagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5ED18B2E2392879EC8F2E5B /* DocumentPagesView.swift */; };
 		5D1FC6B94E4C2F848C39DDCC /* EmptyLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEE297AE3D940D10CF80452 /* EmptyLibraryView.swift */; };
+		6756FFAB56BF0AD5E83749E6 /* NowPlayingBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B523FADECD26DDFDA2E4CA09 /* NowPlayingBar.swift */; };
 		6B4AB08CCADC24C7AD73C533 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BE3E43E4B7A597063BC3A1 /* RootView.swift */; };
 		6DB1D7D28766271A1718DA8A /* ZIPReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205ED3C86A1A3C18666AAA71 /* ZIPReader.swift */; };
 		748077A3CCA3134408493D93 /* PDFExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174D354DACCC3BC43B7BFBCB /* PDFExtractor.swift */; };
@@ -71,8 +74,10 @@
 		AF3DE51697551EC078F5FEA5 /* GenerationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */; };
 		AF41C8A937E998528EB2226F /* TextRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86395D495B5F84BA3BD61953 /* TextRemover.swift */; };
 		B3C6CB8160CD47F876C4995E /* PrepareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A917CB5B6716C3E333C69E26 /* PrepareView.swift */; };
+		B86A0430880C4002DD44B09C /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B350395764DC4657BC32B36 /* AudioPlayer.swift */; };
 		B9A2DF82B8B148B25BB1E8A5 /* RemoveEverywhereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */; };
 		BAA40EF97A55203147C386BC /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9781245570BBF21722464DD7 /* StatusBadge.swift */; };
+		BC494F5862FDC1E3DF2458AE /* iOS-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 974A9DB8ABC0CD0DF856125F /* iOS-Info.plist */; };
 		BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		C236C029EBBA24FBB4933045 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
 		C4490BF4F9756A09661E07E5 /* GenerationPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6286CC51EA7A4F41F4B9257 /* GenerationPlaceholder.swift */; };
@@ -81,6 +86,7 @@
 		D37D064837C0EC13079189A7 /* GenerationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2786953D957BDBEA9F6AC468 /* GenerationQueue.swift */; };
 		D3EDF11C17746863E5E56530 /* ImportPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0D14AADACE294E796AD753 /* ImportPlaceholder.swift */; };
 		D4F2B1F9E1D22F04CC4C8FA2 /* BackgroundTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E99D31A005F3E7ED3C394E4 /* BackgroundTasksView.swift */; };
+		D6A14253A135D5E7C0AA59C2 /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12CB86B294DA0EEC23EA4D95 /* ReaderView.swift */; };
 		D6E7E7EA4D889CEF58EB975A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0EF5E1838604671CEEF9A3F4 /* Assets.xcassets */; };
 		D9BCD41FD3A607F8373FB96E /* ImportPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0D14AADACE294E796AD753 /* ImportPlaceholder.swift */; };
 		DAA78948117F8560836A208C /* CleanUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */; };
@@ -91,6 +97,7 @@
 		E3CD6792F42F66FB8A60DBC0 /* DocumentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2EEE93B27D7A560D253BCA /* DocumentCard.swift */; };
 		E49318AD4F93936BF1CB45E5 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07979DBDFDD453C34BEC8407 /* Notifier.swift */; };
 		F5061FDBAE27B2080030AA54 /* AudioEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E0C42F247232E0796B23B /* AudioEncoder.swift */; };
+		F6E987FA7244EF9FE7C02052 /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12CB86B294DA0EEC23EA4D95 /* ReaderView.swift */; };
 		FE1DC33C71709BD41BDAE3A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
@@ -98,6 +105,7 @@
 		00366FB1E36C0A187FFEE6E8 /* DocumentImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentImporter.swift; sourceTree = "<group>"; };
 		07979DBDFDD453C34BEC8407 /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifier.swift; sourceTree = "<group>"; };
 		0EF5E1838604671CEEF9A3F4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		12CB86B294DA0EEC23EA4D95 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
 		174D354DACCC3BC43B7BFBCB /* PDFExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExtractor.swift; sourceTree = "<group>"; };
 		1786CE1355EE95C4BCCEB56E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1D68AD63754DE00CA8DDE7D0 /* SectionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionEditor.swift; sourceTree = "<group>"; };
@@ -123,14 +131,17 @@
 		749416CE3C531FEDB120AEC0 /* server.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = server.py; sourceTree = "<group>"; };
 		86395D495B5F84BA3BD61953 /* TextRemover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRemover.swift; sourceTree = "<group>"; };
 		8F13A9B83F506E213B265D56 /* OOXMLTextParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OOXMLTextParser.swift; sourceTree = "<group>"; };
+		974A9DB8ABC0CD0DF856125F /* iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "iOS-Info.plist"; sourceTree = "<group>"; };
 		9781245570BBF21722464DD7 /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBadge.swift; sourceTree = "<group>"; };
 		9A7955978F50C31F148A4B56 /* vLearning_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vLearning_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B1B1C7A7A1BEAE85B0F43A9 /* ImageCoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCoding.swift; sourceTree = "<group>"; };
+		9B350395764DC4657BC32B36 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationJob.swift; sourceTree = "<group>"; };
 		9D47A55D915539711D181568 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		A5C7A71823CB6C66FEC74001 /* DocumentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStorage.swift; sourceTree = "<group>"; };
 		A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveEverywhereView.swift; sourceTree = "<group>"; };
 		A917CB5B6716C3E333C69E26 /* PrepareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareView.swift; sourceTree = "<group>"; };
+		B523FADECD26DDFDA2E4CA09 /* NowPlayingBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingBar.swift; sourceTree = "<group>"; };
 		B55250C56079A65D7AFCCDD1 /* vLearning_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = vLearning_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VLDocument.swift; sourceTree = "<group>"; };
 		D6286CC51EA7A4F41F4B9257 /* GenerationPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationPlaceholder.swift; sourceTree = "<group>"; };
@@ -315,7 +326,9 @@
 		A8E202F4E6DAA6841B9F5217 /* Reader */ = {
 			isa = PBXGroup;
 			children = (
+				B523FADECD26DDFDA2E4CA09 /* NowPlayingBar.swift */,
 				2AA431CB87D90EF4DE0B24CF /* ReaderPlaceholder.swift */,
+				12CB86B294DA0EEC23EA4D95 /* ReaderView.swift */,
 			);
 			path = Reader;
 			sourceTree = "<group>";
@@ -329,6 +342,7 @@
 				DB8710EBE2C39458EA4E615C /* Models */,
 				2692A367CD51E9B416BED491 /* Resources */,
 				19A272801FEC1B6DF14410E1 /* Services */,
+				974A9DB8ABC0CD0DF856125F /* iOS-Info.plist */,
 				29F4ED314C354C047593AFE3 /* macOS.entitlements */,
 			);
 			path = vLearning;
@@ -373,6 +387,7 @@
 			isa = PBXGroup;
 			children = (
 				729E0C42F247232E0796B23B /* AudioEncoder.swift */,
+				9B350395764DC4657BC32B36 /* AudioPlayer.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -494,6 +509,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37F48624063380108E09DD83 /* Assets.xcassets in Resources */,
+				BC494F5862FDC1E3DF2458AE /* iOS-Info.plist in Resources */,
 				99C8AAA5FBFEC2AA7BD4CBFF /* server.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -506,6 +522,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5061FDBAE27B2080030AA54 /* AudioEncoder.swift in Sources */,
+				0AF9EBF75469BB0EDAC7D1D6 /* AudioPlayer.swift in Sources */,
 				D4F2B1F9E1D22F04CC4C8FA2 /* BackgroundTasksView.swift in Sources */,
 				1893E297E4204A1DCF4FECCD /* CleanUpView.swift in Sources */,
 				ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */,
@@ -527,12 +544,14 @@
 				D3EDF11C17746863E5E56530 /* ImportPlaceholder.swift in Sources */,
 				07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */,
 				21D9FE70CB0988A3C47E2905 /* Notifier.swift in Sources */,
+				6756FFAB56BF0AD5E83749E6 /* NowPlayingBar.swift in Sources */,
 				BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */,
 				496F66FB3C966421FCEBE2E1 /* OOXMLTextParser.swift in Sources */,
 				0149F98CF58B0BEB76B4EFDB /* PDFExtractor.swift in Sources */,
 				319C4C649968796967952EDA /* PPTXExtractor.swift in Sources */,
 				B3C6CB8160CD47F876C4995E /* PrepareView.swift in Sources */,
 				4815373E3A126EE832851E72 /* ReaderPlaceholder.swift in Sources */,
+				D6A14253A135D5E7C0AA59C2 /* ReaderView.swift in Sources */,
 				B9A2DF82B8B148B25BB1E8A5 /* RemoveEverywhereView.swift in Sources */,
 				DCF6492DE02E091266DFEAE3 /* ReviewPlaceholder.swift in Sources */,
 				6B4AB08CCADC24C7AD73C533 /* RootView.swift in Sources */,
@@ -554,6 +573,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D2890A487C3AADE836680AC1 /* AudioEncoder.swift in Sources */,
+				B86A0430880C4002DD44B09C /* AudioPlayer.swift in Sources */,
 				268B7957B990D1031B03CA10 /* BackgroundTasksView.swift in Sources */,
 				DAA78948117F8560836A208C /* CleanUpView.swift in Sources */,
 				8E921A85EC3AF0AC18B1ABF5 /* DOCXExtractor.swift in Sources */,
@@ -575,12 +595,14 @@
 				D9BCD41FD3A607F8373FB96E /* ImportPlaceholder.swift in Sources */,
 				E16C5F38694AD77BEA6FE9D2 /* LibraryView.swift in Sources */,
 				E49318AD4F93936BF1CB45E5 /* Notifier.swift in Sources */,
+				1DD94979D6677A3B85ADAC6A /* NowPlayingBar.swift in Sources */,
 				136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */,
 				2AAA4C33286D00B8CBDC1E62 /* OOXMLTextParser.swift in Sources */,
 				748077A3CCA3134408493D93 /* PDFExtractor.swift in Sources */,
 				48F3D698F3F455728AA695E8 /* PPTXExtractor.swift in Sources */,
 				82925E7DDA93006F0E3DA712 /* PrepareView.swift in Sources */,
 				95E5BCF322C2D18FFCD9075C /* ReaderPlaceholder.swift in Sources */,
+				F6E987FA7244EF9FE7C02052 /* ReaderView.swift in Sources */,
 				8DACA5F76EA31FF622BA2CC4 /* RemoveEverywhereView.swift in Sources */,
 				07067AD391587C2BCE37EEFB /* ReviewPlaceholder.swift in Sources */,
 				A4DF12BBE2B709704C8ABAE4 /* RootView.swift in Sources */,
@@ -605,6 +627,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "vLearning/iOS-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -682,6 +705,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "vLearning/iOS-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;

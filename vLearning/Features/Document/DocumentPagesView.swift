@@ -15,6 +15,7 @@ struct DocumentPagesView: View {
     @State private var showPrepare = false
     @State private var showRemoveEverywhere = false
     @State private var showGenerate = false
+    @State private var showReader = false
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", sentences = "Sentences", original = "Original"
@@ -71,6 +72,12 @@ struct DocumentPagesView: View {
                 .frame(width: document.kind == .pdf ? 270 : 180)
             }
             ToolbarItem(placement: .primaryAction) {
+                Button { showReader = true } label: {
+                    Label("Listen", systemImage: "play.circle")
+                }
+                .help("Open the reader and listen")
+            }
+            ToolbarItem(placement: .primaryAction) {
                 Button { showGenerate = true } label: {
                     Label("Generate Audio", systemImage: "waveform")
                 }
@@ -115,6 +122,9 @@ struct DocumentPagesView: View {
         .navigationDestination(isPresented: $showCleanUp) {
             CleanUpView(document: document)
         }
+        .navigationDestination(isPresented: $showReader) {
+            ReaderView(document: document)
+        }
         .sheet(isPresented: $showGenerate) {
             GenerateView(document: document) {
                 // Let the Generate sheet finish dismissing before presenting Prepare.
@@ -133,8 +143,20 @@ struct DocumentPagesView: View {
         .sheet(item: $enlargedImage) { url in
             ImageViewer(url: url)
         }
-        .onAppear { document.lastOpenedAt = .now }
+        .onAppear {
+            document.lastOpenedAt = .now
+            openReaderIfRequested()
+        }
+        .onChange(of: AudioPlayer.shared.openReaderRequest) { openReaderIfRequested() }
         .onChange(of: document.id) { mode = .text }
+    }
+
+    /// The mini player asked for this document's reader.
+    private func openReaderIfRequested() {
+        guard AudioPlayer.shared.openReaderRequest == document.id else { return }
+        AudioPlayer.shared.openReaderRequest = nil
+        showCleanUp = false
+        showReader = true
     }
 
     private var header: some View {

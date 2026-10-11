@@ -62,6 +62,12 @@ struct DocumentCard: View {
         VStack(alignment: .trailing, spacing: DS.Space.s) {
             StatusBadge(status: document.generationStatus)
 
+            if document.generationStatus == .complete && document.listenedFraction > 0 {
+                Text("\(Int(document.listenedFraction * 100))% listened")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
             if document.generationStatus == .generating && document.totalPages > 0 {
                 ProgressView(value: document.progressFraction)
                     .progressViewStyle(.linear)

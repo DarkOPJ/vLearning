@@ -62,5 +62,8 @@ and dark mode.
 5. Sentence splitting + S1-mini
 6. Review screen
 7. Generation queue, background tasks, notifications
-8. Reader with highlighting and playback
+8. Reader with highlighting and playback (done: `AudioPlayer` plays the per-sentence clips with AVPlayer,
+   saves the position in `currentPageIndex/currentSentenceIndex`, lock-screen controls via MediaPlayer,
+   iOS background audio via `UIBackgroundModes: audio` in `vLearning/iOS-Info.plist`; `ReaderView`,
+   `NowPlayingBar` at the bottom of the window)
 9. Wi-Fi sync

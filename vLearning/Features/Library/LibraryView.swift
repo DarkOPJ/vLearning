@@ -164,6 +164,7 @@ struct LibraryView: View {
 
     private func delete(_ doc: VLDocument) {
         if selectedDocument == doc { selectedDocument = nil }
+        if AudioPlayer.shared.document?.id == doc.id { AudioPlayer.shared.close() }
         try? DocumentStorage.delete(doc.id)
         context.delete(doc)
     }

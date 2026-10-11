@@ -52,6 +52,11 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - vLearning
+    info:
+      path: vLearning/iOS-Info.plist
+      properties:
+        # Keep reading aloud with the screen locked or in another app.
+        UIBackgroundModes: [audio]
     settings:
       base:
         SDKROOT: iphoneos

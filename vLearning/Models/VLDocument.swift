@@ -111,6 +111,18 @@ final class VLDocument {
     var audioReadyCount: Int { readPages.reduce(0) { $0 + $1.audioReadyCount } }
     var hasAllAudio: Bool { sentenceCount > 0 && audioReadyCount == sentenceCount }
 
+    /// How far listening has got (0...1), from the saved reading position.
+    var listenedFraction: Double {
+        let total = sentenceCount
+        guard total > 0 else { return 0 }
+        let before = readPages.reduce(0) { sum, page in
+            if page.pageIndex < currentPageIndex { return sum + page.sentences.count }
+            if page.pageIndex == currentPageIndex { return sum + min(currentSentenceIndex, page.sentences.count) }
+            return sum
+        }
+        return Double(before) / Double(total)
+    }
+
     init(title: String, kind: DocumentKind, totalPages: Int) {
         self.id = UUID()
         self.title = title

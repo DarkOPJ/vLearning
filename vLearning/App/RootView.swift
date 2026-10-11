@@ -15,6 +15,17 @@ struct RootView: View {
             DocumentDetail(document: selectedDocument)
         }
         .navigationSplitViewStyle(.balanced)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            NowPlayingBar { doc in
+                selectedDocument = doc
+                AudioPlayer.shared.openReaderRequest = doc.id
+            }
+            #if os(macOS)
+            .environment(\.colorScheme, .dark)
+            #endif
+        }
+        .animation(.easeInOut(duration: 0.25), value: AudioPlayer.shared.document?.id)
+        .animation(.easeInOut(duration: 0.25), value: AudioPlayer.shared.readerDocumentId)
     }
 }
 
