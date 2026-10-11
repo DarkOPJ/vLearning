@@ -131,7 +131,7 @@ private struct VoiceLibraryList: View {
     }
 }
 
-/// Adds a voice: a .wav (or any audio file) or a new recording, with exactly what's said in it.
+/// Adds a voice: any audio file (MP3, M4A, WAV, AIFF, FLAC…) or a new recording, with exactly what's said in it.
 private struct AddVoiceView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
@@ -163,7 +163,7 @@ private struct AddVoiceView: View {
                             Text(recorder.elapsed).monospacedDigit().foregroundStyle(.secondary)
                         }
                     } else {
-                        Button("Choose WAV…", systemImage: "folder") { showImporter = true }
+                        Button("Choose Audio…", systemImage: "folder") { showImporter = true }
                         Button("Record", systemImage: "record.circle") {
                             Task { error = await recorder.start() }
                         }
