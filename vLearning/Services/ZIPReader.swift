@@ -38,14 +38,9 @@ struct ZIPReader: Sendable {
     // MARK: - DEFLATE
 
     private func inflateRaw(_ compressed: Data, expected: Int) -> Data? {
-        // Wrap raw DEFLATE bytes in a minimal zlib envelope so Foundation's
-        // built-in zlib decompressor can consume it.
-        // 0x78 0x9C = CMF (deflate, 32KB window) + FLG (default level, no dict,
-        //             FCHECK set so that CMF*256+FLG is divisible by 31).
-        // Foundation's zlib decompressor does not require the adler32 trailer.
-        var wrapped = Data([0x78, 0x9C])
-        wrapped.append(compressed)
-        guard let out = try? (wrapped as NSData).decompressed(using: .zlib),
+        // Foundation's `.zlib` algorithm is raw DEFLATE (RFC 1951) with no zlib
+        // header, which is exactly what ZIP entries store.
+        guard let out = try? (compressed as NSData).decompressed(using: .zlib),
               !out.isEmpty
         else { return nil }
         let outData = out as Data

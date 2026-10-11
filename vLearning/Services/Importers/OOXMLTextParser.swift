@@ -122,15 +122,20 @@ final class OOXMLTextParser: NSObject, XMLParserDelegate {
 
 /// Parses a `.rels` file and returns the map rId → target path for image relationships.
 func parseImageRelationships(from data: Data) -> [String: String] {
+    parseRelationships(from: data).filter { $0.value.type.hasSuffix("/image") }.mapValues(\.target)
+}
+
+/// Parses a `.rels` file into rId → (relationship type URI, target path).
+func parseRelationships(from data: Data) -> [String: (type: String, target: String)] {
     let p = RelsParser()
     let x = XMLParser(data: data)
     x.delegate = p
     x.parse()
-    return p.imageRels
+    return p.rels
 }
 
 private final class RelsParser: NSObject, XMLParserDelegate {
-    var imageRels: [String: String] = [:]
+    var rels: [String: (type: String, target: String)] = [:]
 
     func parser(
         _ parser: XMLParser,
@@ -142,50 +147,8 @@ private final class RelsParser: NSObject, XMLParserDelegate {
         guard element == "Relationship",
               let id     = attributes["Id"],
               let target = attributes["Target"],
-              let type_  = attributes["Type"],
-              type_.hasSuffix("/image")
+              let type_  = attributes["Type"]
         else { return }
-        imageRels[id] = target
-    }
-}
-
-// MARK: - DOCX page-break detection
-
-/// Returns the positions of explicit page breaks (`<w:br w:type="page"/>`) in
-/// the flat list of DOCX paragraph elements, so the extractor can split them.
-func parseDocxPageBreakIndices(from data: Data) -> [Int] {
-    let p = DocxBreakParser()
-    let x = XMLParser(data: data)
-    x.delegate = p
-    x.parse()
-    return p.breakIndices
-}
-
-private final class DocxBreakParser: NSObject, XMLParserDelegate {
-    var breakIndices: [Int] = []
-    private var paragraphIndex = 0
-    private var inPara = false
-    private var hadBreak = false
-
-    func parser(_ parser: XMLParser, didStartElement element: String,
-                namespaceURI: String?, qualifiedName _: String?,
-                attributes attrs: [String: String] = [:]) {
-        switch element {
-        case "w:p":
-            inPara = true
-            hadBreak = false
-        case "w:br" where inPara:
-            if attrs["w:type"] == "page" { hadBreak = true }
-        default: break
-        }
-    }
-
-    func parser(_ parser: XMLParser, didEndElement element: String,
-                namespaceURI: String?, qualifiedName _: String?) {
-        if element == "w:p" {
-            if hadBreak { breakIndices.append(paragraphIndex) }
-            paragraphIndex += 1
-            inPara = false
-        }
+        rels[id] = (type_, target)
     }
 }

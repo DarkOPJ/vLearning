@@ -10,9 +10,10 @@ final class DocumentPage {
     var ocrText: String              // text from user-selected images
     var isLikelyScanned: Bool        // PDF page with almost no selectable text
     var sentences: [String]          // split by the sentence splitter in step 5
-    var imageFilePaths: [String]     // paths of extracted images (pre-OCR)
+    var imageFilePaths: [String]     // extracted images, relative to the document's storage folder
+    var previewImagePath: String?    // rendered page (PDF), relative to the document's storage folder
     var selectedImageIndices: [Int]  // which images the user chose for OCR
-    var audioFilePath: String?       // path to the generated .m4a
+    var audioFilePath: String?       // generated .m4a, relative to the document's storage folder
 
     var document: VLDocument?
 

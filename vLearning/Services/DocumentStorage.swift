@@ -11,6 +11,16 @@ enum DocumentStorage {
         directory(for: docId).appendingPathComponent("pages/\(pageIndex)", isDirectory: true)
     }
 
+    /// Resolves a path stored on a model (relative to the document folder) to a file URL.
+    /// Paths are stored relative because the iOS app container moves on every reinstall.
+    static func url(for docId: UUID, relativePath: String) -> URL {
+        directory(for: docId).appendingPathComponent(relativePath)
+    }
+
+    static func originalURL(for docId: UUID, kind: DocumentKind) -> URL {
+        directory(for: docId).appendingPathComponent("original.\(kind.rawValue)")
+    }
+
     static func audioURL(for docId: UUID, pageIndex: Int) -> URL {
         directory(for: docId).appendingPathComponent("audio/page_\(pageIndex).m4a")
     }

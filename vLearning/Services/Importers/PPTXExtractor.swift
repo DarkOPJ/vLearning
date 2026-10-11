@@ -1,9 +1,4 @@
 import Foundation
-#if os(iOS)
-import UIKit
-#else
-import AppKit
-#endif
 
 enum PPTXExtractor {
 
@@ -19,36 +14,37 @@ enum PPTXExtractor {
 
         for (idx, slidePath) in slideEntries.enumerated() {
             guard let slideData = reader.extract(path: slidePath) else { continue }
-            let textParser = OOXMLTextParser.parse(slideData)
+            let text = OOXMLTextParser.parse(slideData)
 
-            // Resolve image rIds → media bytes
-            let relsPath = "ppt/slides/_rels/\(URL(fileURLWithPath: slidePath).lastPathComponent).rels"
-            var imageData: [Data] = []
-            if let relsData = reader.extract(path: relsPath) {
-                let rels = parseImageRelationships(from: relsData)
-                for rid in textParser.imageRids {
-                    guard let target = rels[rid] else { continue }
-                    let mediaPath = resolveRelativePath(base: "ppt/slides/", relative: target)
-                    if let imgData = reader.extract(path: mediaPath) {
-                        imageData.append(toJPEG(imgData) ?? imgData)
-                    }
-                }
+            let slideName = URL(fileURLWithPath: slidePath).lastPathComponent
+            let rels = reader.extract(path: "ppt/slides/_rels/\(slideName).rels").map(parseRelationships) ?? [:]
+
+            // Images, in the order they appear on the slide (each picture once).
+            var images: [Data] = []
+            var usedTargets = Set<String>()
+            for rid in text.imageRids {
+                guard let rel = rels[rid], rel.type.hasSuffix("/image") else { continue }
+                let mediaPath = resolveRelativePath(base: "ppt/slides/", relative: rel.target)
+                guard usedTargets.insert(mediaPath).inserted,
+                      let raw = reader.extract(path: mediaPath),
+                      let jpeg = ImageCoding.jpeg(from: raw, minSide: 32)
+                else { continue }
+                images.append(jpeg)
             }
 
-            // Speaker notes
-            let notesSlidePath = "ppt/notesSlides/notesSlide\(slideNumber(slidePath)).xml"
+            // Speaker notes: follow the slide's notesSlide relationship (file numbers don't always match).
             var notesText = ""
-            if let notesData = reader.extract(path: notesSlidePath) {
-                notesText = OOXMLTextParser.parse(notesData).bodyText
+            if let notesRel = rels.values.first(where: { $0.type.hasSuffix("/notesSlide") }),
+               let notesData = reader.extract(path: resolveRelativePath(base: "ppt/slides/", relative: notesRel.target)) {
+                notesText = cleanNotes(OOXMLTextParser.parse(notesData).bodyText, slideNumber: idx + 1)
             }
 
             pages.append(ExtractedPage(
                 index: idx,
-                bodyText: textParser.bodyText,
+                bodyText: text.bodyText,
                 notesText: notesText,
-                tablesText: textParser.tableText,
-                imageData: imageData,
-                isLikelyScanned: false
+                tablesText: text.tableText,
+                imageData: images
             ))
         }
 
@@ -62,24 +58,20 @@ enum PPTXExtractor {
         return Int(name.replacingOccurrences(of: "slide", with: "")) ?? 0
     }
 
-    private static func resolveRelativePath(base: String, relative: String) -> String {
-        var components = base.split(separator: "/").map(String.init)
-        for part in relative.split(separator: "/").map(String.init) {
-            if part == ".." { components.removeLast() }
-            else { components.append(part) }
-        }
-        return components.joined(separator: "/")
+    /// Notes pages repeat the slide number in a placeholder; drop that lone line.
+    private static func cleanNotes(_ text: String, slideNumber: Int) -> String {
+        text.components(separatedBy: "\n")
+            .filter { $0.trimmingCharacters(in: .whitespaces) != String(slideNumber) }
+            .joined(separator: "\n")
     }
 
-    private static func toJPEG(_ data: Data) -> Data? {
-        #if os(iOS)
-        UIImage(data: data)?.jpegData(compressionQuality: 0.85)
-        #else
-        guard let img = NSImage(data: data),
-              let cgImage = img.cgImage(forProposedRect: nil, context: nil, hints: nil)
-        else { return nil }
-        let rep = NSBitmapImageRep(cgImage: cgImage)
-        return rep.representation(using: .jpeg, properties: [.compressionFactor: NSNumber(value: 0.85)])
-        #endif
+    private static func resolveRelativePath(base: String, relative: String) -> String {
+        if relative.hasPrefix("/") { return String(relative.dropFirst()) }
+        var components = base.split(separator: "/").map(String.init)
+        for part in relative.split(separator: "/").map(String.init) {
+            if part == ".." { if !components.isEmpty { components.removeLast() } }
+            else if part != "." { components.append(part) }
+        }
+        return components.joined(separator: "/")
     }
 }

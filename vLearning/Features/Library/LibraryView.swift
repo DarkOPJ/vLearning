@@ -86,6 +86,11 @@ struct LibraryView: View {
                             .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                            .contextMenu {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    delete(doc)
+                                }
+                            }
                     }
                     .onDelete(perform: deleteDocuments)
                 }
@@ -140,9 +145,13 @@ struct LibraryView: View {
     }
 
     private func deleteDocuments(at offsets: IndexSet) {
-        for i in offsets {
-            context.delete(filtered[i])
-        }
+        offsets.map { filtered[$0] }.forEach(delete)
+    }
+
+    private func delete(_ doc: VLDocument) {
+        if selectedDocument == doc { selectedDocument = nil }
+        try? DocumentStorage.delete(doc.id)
+        context.delete(doc)
     }
 }
 

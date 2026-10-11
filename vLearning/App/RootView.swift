@@ -12,35 +12,19 @@ struct RootView: View {
                 .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 420)
                 #endif
         } detail: {
-            DocumentDetailPlaceholder(document: selectedDocument)
+            DocumentDetail(document: selectedDocument)
         }
         .navigationSplitViewStyle(.balanced)
     }
 }
 
-// Placeholder until the reader is built in step 8
-private struct DocumentDetailPlaceholder: View {
+private struct DocumentDetail: View {
     let document: VLDocument?
 
     var body: some View {
         if let doc = document {
-            VStack(spacing: DS.Space.m) {
-                Image(systemName: doc.kind.sfSymbol)
-                    .font(.system(size: 48, weight: .light))
-                    .foregroundStyle(Color.accentColor)
-                Text(doc.title)
-                    .font(.system(.title2, design: .rounded, weight: .semibold))
-                Text("Reader coming in step 8")
-                    .foregroundStyle(.secondary)
-                    .font(.subheadline)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            #if os(macOS)
-            .background(Color.macMain)
-            .environment(\.colorScheme, .dark)
-            #else
-            .background(Color.systemBackground)
-            #endif
+            DocumentPagesView(document: doc)
+                .id(doc.id)
         } else {
             ContentUnavailableView(
                 "No Document Selected",
