@@ -174,25 +174,53 @@ private struct PageCard: View {
         VStack(alignment: .leading, spacing: DS.Space.m) {
             headerRow
 
-            if showOriginal, let preview = page.previewImagePath {
-                StoredImage(url: url(preview), maxPixelSize: 1600)
-                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
-                    .onTapGesture { onImageTap(url(preview)) }
-            } else {
-                textContent
+            Group {
+                if showOriginal, let preview = page.previewImagePath {
+                    StoredImage(url: url(preview), maxPixelSize: 1600)
+                        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
+                        .onTapGesture { onImageTap(url(preview)) }
+                } else {
+                    textContent
+                }
             }
+            .opacity(page.isSkipped ? 0.45 : 1)
+            .saturation(page.isSkipped ? 0 : 1)
         }
         .padding(DS.Space.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
-        .opacity(page.isSkipped ? 0.5 : 1)
+        .animation(.easeInOut(duration: 0.2), value: page.isSkipped)
     }
 
     private var headerRow: some View {
         HStack(spacing: DS.Space.s) {
             Text(title).sectionHeaderStyle()
             Spacer()
-            if page.isSkipped { Tag(text: "Skipped", systemImage: "speaker.slash", color: .secondary) }
+            tags
+                .opacity(page.isSkipped ? 0.45 : 1)
+                .saturation(page.isSkipped ? 0 : 1)
+            skipButton
+        }
+    }
+
+    /// Skips the whole page (it won't be read). Click again to bring it back.
+    private var skipButton: some View {
+        Button {
+            page.isSkipped.toggle()
+        } label: {
+            Text(page.isSkipped ? "Skipped" : "Skip")
+                .font(.system(.caption, weight: .semibold))
+                .frame(minWidth: 52)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .tint(page.isSkipped ? .orange : nil)
+        .help(page.isSkipped ? "This page won't be read. Click to include it again." : "Don't read this page")
+    }
+
+    @ViewBuilder
+    private var tags: some View {
+        HStack(spacing: DS.Space.s) {
             if page.hasEdits { Tag(text: "Edited", systemImage: "pencil", color: Color.accentColor) }
             if !page.cleanText(.ocr).isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
             if page.isLikelyScanned { Tag(text: "Scanned", systemImage: "doc.viewfinder", color: .orange) }
