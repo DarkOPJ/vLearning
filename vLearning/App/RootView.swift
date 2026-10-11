@@ -23,8 +23,10 @@ private struct DocumentDetail: View {
 
     var body: some View {
         if let doc = document {
-            DocumentPagesView(document: doc)
-                .id(doc.id)
+            NavigationStack {
+                DocumentPagesView(document: doc)
+            }
+            .id(doc.id)
         } else {
             ContentUnavailableView(
                 "No Document Selected",

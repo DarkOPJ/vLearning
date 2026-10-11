@@ -15,6 +15,7 @@
 		11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
 		136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		15046BD8A296DE05365982E8 /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
+		1893E297E4204A1DCF4FECCD /* CleanUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */; };
 		1A0F8D038AECFB73277B9E5D /* VLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */; };
 		1EEBBD69B90AFEE985A6A7AC /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
 		1F9EA11D335FF21C10F38C03 /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
@@ -61,6 +62,7 @@
 		D3EDF11C17746863E5E56530 /* ImportPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0D14AADACE294E796AD753 /* ImportPlaceholder.swift */; };
 		D6E7E7EA4D889CEF58EB975A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0EF5E1838604671CEEF9A3F4 /* Assets.xcassets */; };
 		D9BCD41FD3A607F8373FB96E /* ImportPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0D14AADACE294E796AD753 /* ImportPlaceholder.swift */; };
+		DAA78948117F8560836A208C /* CleanUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */; };
 		DCF6492DE02E091266DFEAE3 /* ReviewPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */; };
 		E16C5F38694AD77BEA6FE9D2 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7F6709524488EE4C96546 /* LibraryView.swift */; };
 		E3CD6792F42F66FB8A60DBC0 /* DocumentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2EEE93B27D7A560D253BCA /* DocumentCard.swift */; };
@@ -74,6 +76,7 @@
 		1786CE1355EE95C4BCCEB56E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1F0D14AADACE294E796AD753 /* ImportPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPlaceholder.swift; sourceTree = "<group>"; };
 		205ED3C86A1A3C18666AAA71 /* ZIPReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZIPReader.swift; sourceTree = "<group>"; };
+		273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanUpView.swift; sourceTree = "<group>"; };
 		29F4ED314C354C047593AFE3 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		2AA431CB87D90EF4DE0B24CF /* ReaderPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderPlaceholder.swift; sourceTree = "<group>"; };
 		32560B5EE019AD23C009ED69 /* vLearningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vLearningApp.swift; sourceTree = "<group>"; };
@@ -205,9 +208,18 @@
 			path = Review;
 			sourceTree = "<group>";
 		};
+		8ADE78898375907FD86C4262 /* CleanUp */ = {
+			isa = PBXGroup;
+			children = (
+				273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */,
+			);
+			path = CleanUp;
+			sourceTree = "<group>";
+		};
 		9248F0F127215DE5F6F18373 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8ADE78898375907FD86C4262 /* CleanUp */,
 				04250A42F232649A76A4C83A /* Document */,
 				FCAE70C00D50BDD4A2AD7BBE /* Generation */,
 				ABDDCEE2EC56845C45BAC528 /* Import */,
@@ -385,6 +397,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1893E297E4204A1DCF4FECCD /* CleanUpView.swift in Sources */,
 				ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */,
 				50E4FCDC543A8628A0E40514 /* DesignSystem.swift in Sources */,
 				2CD858C899D53E99EBC28A29 /* DocumentCard.swift in Sources */,
@@ -420,6 +433,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAA78948117F8560836A208C /* CleanUpView.swift in Sources */,
 				8E921A85EC3AF0AC18B1ABF5 /* DOCXExtractor.swift in Sources */,
 				7895737D581519B21E220464 /* DesignSystem.swift in Sources */,
 				E3CD6792F42F66FB8A60DBC0 /* DocumentCard.swift in Sources */,

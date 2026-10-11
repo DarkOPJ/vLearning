@@ -18,11 +18,77 @@ final class DocumentPage {
     var hiddenOCRPaths: [String] = []        // images hidden from the OCR picker
     var audioFilePath: String?       // generated .m4a, relative to the document's storage folder
 
+    // Clean Up edits (before S1-mini). nil = use the original section text unchanged.
+    var editedBody: String?
+    var editedOCR: String?
+    var editedNotes: String?
+    var editedTables: String?
+    var isSkipped: Bool = false      // user chose not to read this page at all
+
     var document: VLDocument?
 
-    // Ordered full text the TTS engine will read: body → OCR → notes → tables
+    /// The four text sections of a page, in the order they're read.
+    enum Section: String, CaseIterable, Identifiable {
+        case body, ocr, notes, tables
+        var id: Self { self }
+
+        var title: String {
+            switch self {
+            case .body:   "Page text"
+            case .ocr:    "Text from images"
+            case .notes:  "Speaker notes"
+            case .tables: "Table"
+            }
+        }
+    }
+
+    func originalText(_ section: Section) -> String {
+        switch section {
+        case .body:   extractedText
+        case .ocr:    ocrText
+        case .notes:  notesText
+        case .tables: tablesText
+        }
+    }
+
+    func editedText(_ section: Section) -> String? {
+        switch section {
+        case .body:   editedBody
+        case .ocr:    editedOCR
+        case .notes:  editedNotes
+        case .tables: editedTables
+        }
+    }
+
+    /// Stores an edit; setting the original text back (or nil) clears the edit.
+    func setEditedText(_ text: String?, for section: Section) {
+        let value = text == originalText(section) ? nil : text
+        switch section {
+        case .body:   editedBody = value
+        case .ocr:    editedOCR = value
+        case .notes:  editedNotes = value
+        case .tables: editedTables = value
+        }
+    }
+
+    /// The section's text after Clean Up edits.
+    func cleanText(_ section: Section) -> String {
+        editedText(section) ?? originalText(section)
+    }
+
+    func isEdited(_ section: Section) -> Bool { editedText(section) != nil }
+    var hasEdits: Bool { Section.allCases.contains(where: isEdited) }
+
+    /// Sections that have text either originally or after editing.
+    var presentSections: [Section] {
+        Section.allCases.filter { !originalText($0).isEmpty || isEdited($0) }
+    }
+
+    /// Ordered full text that goes on to S1-mini and the TTS engine: body → OCR → notes → tables.
     var readableText: String {
-        [extractedText, ocrText, notesText, tablesText]
+        guard !isSkipped else { return "" }
+        return Section.allCases
+            .map { cleanText($0).trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .joined(separator: "\n\n")
     }
@@ -37,13 +103,17 @@ final class DocumentPage {
     }
 
     /// Rebuilds `ocrText` from the selected images' results, in on-page order.
+    /// If the OCR text changes, Clean Up edits to it no longer apply and are dropped.
     func rebuildOCRText() {
+        let previous = ocrText
         ocrText = ocrCandidates
             .filter { ocrSelectedPaths.contains($0) }
             .compactMap { ocrResults[$0] }
             .filter { !$0.isEmpty }
             .joined(separator: "\n\n")
+        if ocrText != previous { editedOCR = nil }
     }
+
     var hasAudio: Bool { audioFilePath != nil }
 
     init(pageIndex: Int, extractedText: String = "") {

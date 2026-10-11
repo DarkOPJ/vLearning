@@ -12,8 +12,13 @@ and PDF (digital, scanned, hybrid) aloud, with sentence highlighting. English on
 3. Image picker: the user chooses which images to OCR. Only those get OCR'd (Apple Vision), and their
    text is inserted into that page.
 4. Split into sentences, even when full stops are missing (NaturalLanguage plus heuristics).
-5. Normalize with superwhisper S1-mini (~0.6B; built for dictation, so it's a toggle; test that it
-   doesn't reword document text).
+5. **Clean Up** (before S1): page-by-page editing of each section (page text, image text, notes,
+   tables), with restore and per-page skip, so nothing unwanted reaches S1.
+6. Normalize with superwhisper S1-mini, MLX 8-bit: `mlx-community/S1-mini-MLX-8bit` (Mac, via mlx-lm,
+   loaded on demand and unloaded after). It's built for dictation, so it's a toggle. Thinking must be
+   off, and the system prompt and control line must be exactly as on the model card. Input is up to
+   ~1000 tokens, chunked at sentences.
+7. Optional review after S1, sentence by sentence.
 6. **Review screen**: page by page, toggle between the original page and the extracted text, edit the
    text, then "Ready to generate".
 7. Generate (background), with local notifications in and out of the app.

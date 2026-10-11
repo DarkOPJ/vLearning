@@ -11,6 +11,7 @@ struct DocumentPagesView: View {
     @State private var quickLookURL: URL?
     @State private var enlargedImage: URL?
     @State private var showOCR = false
+    @State private var showCleanUp = false
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", original = "Original"
@@ -65,6 +66,12 @@ struct DocumentPagesView: View {
                     .frame(width: 200)
                 }
             }
+            ToolbarItem(placement: .primaryAction) {
+                Button { showCleanUp = true } label: {
+                    Label("Clean Up", systemImage: "eraser")
+                }
+                .help("Edit or remove text before cleanup and audio")
+            }
             if hasOCRCandidates {
                 ToolbarItem(placement: .primaryAction) {
                     Button { showOCR = true } label: {
@@ -83,6 +90,9 @@ struct DocumentPagesView: View {
             }
         }
         .quickLookPreview($quickLookURL)
+        .navigationDestination(isPresented: $showCleanUp) {
+            CleanUpView(document: document)
+        }
         .sheet(isPresented: $showOCR) {
             OCRSelectionView(document: document)
         }
@@ -175,16 +185,19 @@ private struct PageCard: View {
         .padding(DS.Space.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
+        .opacity(page.isSkipped ? 0.5 : 1)
     }
 
     private var headerRow: some View {
         HStack(spacing: DS.Space.s) {
             Text(title).sectionHeaderStyle()
             Spacer()
-            if !page.ocrText.isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
+            if page.isSkipped { Tag(text: "Skipped", systemImage: "speaker.slash", color: .secondary) }
+            if page.hasEdits { Tag(text: "Edited", systemImage: "pencil", color: Color.accentColor) }
+            if !page.cleanText(.ocr).isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
             if page.isLikelyScanned { Tag(text: "Scanned", systemImage: "doc.viewfinder", color: .orange) }
-            if !page.notesText.isEmpty { Tag(text: "Notes", systemImage: "note.text", color: .purple) }
-            if !page.tablesText.isEmpty { Tag(text: "Table", systemImage: "tablecells", color: .teal) }
+            if !page.cleanText(.notes).isEmpty { Tag(text: "Notes", systemImage: "note.text", color: .purple) }
+            if !page.cleanText(.tables).isEmpty { Tag(text: "Table", systemImage: "tablecells", color: .teal) }
             if page.hasImages {
                 Tag(text: "\(page.imageFilePaths.count)", systemImage: "photo", color: .blue)
             }
@@ -193,9 +206,9 @@ private struct PageCard: View {
 
     @ViewBuilder
     private var textContent: some View {
-        if page.extractedText.isEmpty && !page.ocrText.isEmpty {
+        if page.cleanText(.body).isEmpty && !page.cleanText(.ocr).isEmpty {
             EmptyView()
-        } else if page.extractedText.isEmpty {
+        } else if page.cleanText(.body).isEmpty {
             Text(page.isLikelyScanned
                  ? "No selectable text. This looks like a scanned page; its text will come from OCR."
                  : "No text on this page.")
@@ -203,23 +216,23 @@ private struct PageCard: View {
                 .italic()
                 .foregroundStyle(.secondary)
         } else {
-            Text(page.extractedText)
+            Text(page.cleanText(.body))
                 .font(.body)
                 .lineSpacing(4)
                 .textSelection(.enabled)
         }
 
-        if !page.ocrText.isEmpty {
+        if !page.cleanText(.ocr).isEmpty {
             LabeledBlock(label: "Text from images") {
-                Text(page.ocrText)
+                Text(page.cleanText(.ocr))
                     .font(.body)
                     .lineSpacing(4)
                     .textSelection(.enabled)
             }
         }
 
-        if !page.tablesText.isEmpty {
-            LabeledBlock(label: "Table") { TableText(text: page.tablesText) }
+        if !page.cleanText(.tables).isEmpty {
+            LabeledBlock(label: "Table") { TableText(text: page.cleanText(.tables)) }
         }
 
         if page.hasImages {
@@ -238,9 +251,9 @@ private struct PageCard: View {
             }
         }
 
-        if !page.notesText.isEmpty {
+        if !page.cleanText(.notes).isEmpty {
             LabeledBlock(label: "Speaker notes") {
-                Text(page.notesText)
+                Text(page.cleanText(.notes))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)

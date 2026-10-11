@@ -262,6 +262,12 @@ struct OCRSelectionView: View {
                         .font(.callout)
                 }
                 .tint(Color.accentColor)
+            } else if !viewingHidden && pages.contains(where: { $0.editedOCR != nil }) && failures == 0 {
+                Label("Changing which images are read replaces your Clean Up edits to image text on those pages.",
+                      systemImage: "info.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             } else if failures > 0 && !viewingHidden {
                 Label("\(failures) image\(failures == 1 ? "" : "s") couldn't be read.",
                       systemImage: "exclamationmark.triangle.fill")
