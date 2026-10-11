@@ -10,6 +10,8 @@ struct LibraryView: View {
     @State private var showImportPicker = false
     @State private var showSettings = false
     @State private var searchText = ""
+    @State private var isImporting = false
+    @State private var importError: String?
 
     private var filtered: [VLDocument] {
         guard !searchText.isEmpty else { return documents }
@@ -23,6 +25,32 @@ struct LibraryView: View {
             } else {
                 libraryList
             }
+        }
+        .overlay {
+            if isImporting {
+                ZStack {
+                    Color.black.opacity(0.4).ignoresSafeArea()
+                    VStack(spacing: DS.Space.m) {
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(Color.accentColor)
+                        Text("Importing…")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(DS.Space.xxxl)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
+                }
+            }
+        }
+        .alert("Import Failed", isPresented: Binding(
+            get: { importError != nil },
+            set: { if !$0 { importError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importError ?? "")
         }
         #if os(macOS)
         .background(Color.macSidebar)
@@ -93,17 +121,22 @@ struct LibraryView: View {
     // MARK: - Actions
 
     private func handleImport(_ result: Result<[URL], Error>) {
-        // Full implementation in step 3 — stub accepted here so the file picker wires up
         guard case .success(let urls) = result, let url = urls.first else { return }
-        guard let kind = DocumentKind.from(fileExtension: url.pathExtension) else { return }
+        guard DocumentKind.from(fileExtension: url.pathExtension) != nil else {
+            importError = "'\(url.pathExtension)' is not a supported format."
+            return
+        }
 
-        let stub = VLDocument(
-            title: url.deletingPathExtension().lastPathComponent,
-            kind: kind,
-            totalPages: 0
-        )
-        context.insert(stub)
-        selectedDocument = stub
+        isImporting = true
+        Task {
+            do {
+                let doc = try await DocumentImporter.importDocument(from: url, into: context)
+                selectedDocument = doc
+            } catch {
+                importError = error.localizedDescription
+            }
+            isImporting = false
+        }
     }
 
     private func deleteDocuments(at offsets: IndexSet) {

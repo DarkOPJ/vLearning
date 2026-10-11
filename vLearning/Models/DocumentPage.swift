@@ -8,6 +8,7 @@ final class DocumentPage {
     var notesText: String            // speaker notes (PPTX) or footnotes
     var tablesText: String           // stringified table content
     var ocrText: String              // text from user-selected images
+    var isLikelyScanned: Bool        // PDF page with almost no selectable text
     var sentences: [String]          // split by the sentence splitter in step 5
     var imageFilePaths: [String]     // paths of extracted images (pre-OCR)
     var selectedImageIndices: [Int]  // which images the user chose for OCR
@@ -31,6 +32,7 @@ final class DocumentPage {
         self.notesText = ""
         self.tablesText = ""
         self.ocrText = ""
+        self.isLikelyScanned = false
         self.sentences = []
         self.imageFilePaths = []
         self.selectedImageIndices = []
