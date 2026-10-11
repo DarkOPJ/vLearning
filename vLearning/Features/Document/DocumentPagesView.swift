@@ -188,6 +188,11 @@ private struct PageCard: View {
     let onImageTap: (URL) -> Void
 
     @State private var isEditing = false
+    /// In the Sentences view, editing works on a draft (one sentence per line) saved on Done.
+    @State private var sentenceDraft = ""
+
+    private var editsSentences: Bool { mode == .sentences }
+    private var isEdited: Bool { editsSentences ? page.sentencesEdited : page.hasEdits }
 
     private func url(_ relative: String) -> URL {
         DocumentStorage.url(for: documentId, relativePath: relative)
@@ -198,7 +203,9 @@ private struct PageCard: View {
             headerRow
 
             Group {
-                if isEditing {
+                if isEditing && editsSentences {
+                    sentenceEditor
+                } else if isEditing {
                     editContent
                 } else if mode == .sentences {
                     sentencesContent
@@ -218,6 +225,53 @@ private struct PageCard: View {
         .cardStyle()
         .animation(.easeInOut(duration: 0.2), value: page.isSkipped)
         .animation(.easeInOut(duration: 0.2), value: isEditing)
+        .onChange(of: mode) { oldMode, _ in
+            // Switching views ends editing; keep what was typed in the sentence draft.
+            if isEditing && oldMode == .sentences { commitSentences() }
+            isEditing = false
+        }
+    }
+
+    /// Edits the prepared (S1) sentences directly. One line = one sentence, read as one piece.
+    private var sentenceEditor: some View {
+        VStack(alignment: .leading, spacing: DS.Space.s) {
+            HStack {
+                Text("Sentences · one per line")
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if page.sentencesEdited || sentenceDraft != page.preparedSentences.joined(separator: "\n") {
+                    Button("Restore Prepared Text") {
+                        sentenceDraft = page.preparedSentences.joined(separator: "\n")
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                }
+            }
+            TextEditor(text: $sentenceDraft)
+                .font(.body)
+                .lineSpacing(3)
+                .scrollContentBackground(.hidden)
+                .padding(DS.Space.s)
+                .frame(height: sentenceEditorHeight)
+                .background(Color.secondary.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
+            Text("Press Return to split a sentence, or join two lines to merge them. Changes are saved when you click Editing.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var sentenceEditorHeight: CGFloat {
+        let lines = sentenceDraft.components(separatedBy: "\n").reduce(0) { $0 + max(1, $1.count / 80 + 1) }
+        return min(max(CGFloat(lines) * 22 + 16, 90), 480)
+    }
+
+    private func commitSentences() {
+        page.sentences = sentenceDraft
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
     }
 
     /// The prepared sentences, numbered, exactly as they'll be read.
@@ -287,24 +341,31 @@ private struct PageCard: View {
     /// Edit → Editing (text boxes open) → Edited once there are changes. Click again to edit or revert.
     private var editButton: some View {
         Button {
+            if editsSentences {
+                if isEditing { commitSentences() } else { sentenceDraft = page.sentences.joined(separator: "\n") }
+            }
             isEditing.toggle()
         } label: {
-            Text(isEditing ? "Editing" : (page.hasEdits ? "Edited" : "Edit"))
+            Text(isEditing ? "Editing" : (isEdited ? "Edited" : "Edit"))
                 .font(.system(.caption, weight: .semibold))
                 .frame(minWidth: 52)
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
-        .tint(isEditing || page.hasEdits ? Color.accentColor : nil)
-        .disabled(page.isSkipped)
-        .help(isEditing ? "Click when you're done editing" : "Edit this page's text")
+        .tint(isEditing || isEdited ? Color.accentColor : nil)
+        .disabled(page.isSkipped || (editsSentences && !page.isPrepared))
+        .help(isEditing ? "Click when you're done editing"
+              : editsSentences ? "Edit the prepared sentences" : "Edit this page's extracted text")
     }
 
     /// Skips the whole page (it won't be read). Click again to bring it back.
     private var skipButton: some View {
         Button {
             page.isSkipped.toggle()
-            if page.isSkipped { isEditing = false }
+            if page.isSkipped {
+                if isEditing && editsSentences { commitSentences() }
+                isEditing = false
+            }
         } label: {
             Text(page.isSkipped ? "Skipped" : "Skip")
                 .font(.system(.caption, weight: .semibold))

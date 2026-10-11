@@ -27,6 +27,7 @@ final class DocumentPage {
 
     // Prepared for reading (S1-mini + sentence splitting).
     var preparedFrom: String?        // readableText the sentences were made from
+    var preparedSentences: [String] = []   // sentences as Prepare produced them (before review edits)
     var preparedWithS1: Bool = false
 
     var document: VLDocument?
@@ -121,6 +122,8 @@ final class DocumentPage {
     var hasAudio: Bool { audioFilePath != nil }
 
     var isPrepared: Bool { preparedFrom != nil }
+    /// Sentences were edited after Prepare (review after S1).
+    var sentencesEdited: Bool { !preparedSentences.isEmpty && sentences != preparedSentences }
     /// Prepared, but the text was edited (or OCR changed) afterwards.
     var isPreparedStale: Bool { preparedFrom.map { $0 != readableText } ?? false }
 

@@ -45,7 +45,9 @@ enum DocumentPreparer {
         for (i, page) in pages.enumerated() {
             try Task.checkCancellation()
             let source = page.readableText
-            page.sentences = page.isSkipped ? [] : try await sentences(for: page, useS1: useS1, styling: options.styling)
+            let prepared = page.isSkipped ? [] : try await sentences(for: page, useS1: useS1, styling: options.styling)
+            page.sentences = prepared
+            page.preparedSentences = prepared
             page.preparedFrom = source
             page.preparedWithS1 = useS1
             progress(i + 1, pages.count)

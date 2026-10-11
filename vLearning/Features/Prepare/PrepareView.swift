@@ -55,6 +55,15 @@ struct PrepareView: View {
                     }
                 }
 
+                if pages.contains(where: \.sentencesEdited) {
+                    Section {
+                        Label("Preparing a page again replaces the sentence edits you made on it.",
+                              systemImage: "info.circle")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 if isRunning {
                     Section {
                         VStack(alignment: .leading, spacing: DS.Space.s) {
