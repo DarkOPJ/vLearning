@@ -30,6 +30,10 @@ final class DocumentPage {
     var preparedSentences: [String] = []   // sentences as Prepare produced them (before review edits)
     var preparedWithS1: Bool = false
 
+    // Audio, one clip per sentence, keyed by the sentence's text so edits only regenerate what changed.
+    var sentenceAudio: [String: String] = [:]      // sentence text → relative .m4a path
+    var sentenceDurations: [String: Double] = [:]  // sentence text → seconds
+
     var document: VLDocument?
 
     /// The four text sections of a page, in the order they're read.
@@ -122,6 +126,12 @@ final class DocumentPage {
     var hasAudio: Bool { audioFilePath != nil }
 
     var isPrepared: Bool { preparedFrom != nil }
+
+    /// Sentences on this page that will be read but have no audio yet.
+    var sentencesMissingAudio: [String] {
+        isSkipped ? [] : sentences.filter { sentenceAudio[$0] == nil }
+    }
+    var audioReadyCount: Int { isSkipped ? 0 : sentences.filter { sentenceAudio[$0] != nil }.count }
     /// Sentences were edited after Prepare (review after S1).
     var sentencesEdited: Bool { !preparedSentences.isEmpty && sentences != preparedSentences }
     /// Prepared, but the text was edited (or OCR changed) afterwards.

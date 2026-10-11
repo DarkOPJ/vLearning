@@ -101,6 +101,11 @@ final class EngineController {
         return out
     }
 
+    /// Speaks one sentence with Breeze. Returns WAV data. Loads Breeze on first use.
+    func synthesize(_ text: String, instruct: String, speed: Double = 1.0) async throws -> Data {
+        try await post("/synthesize", body: ["text": text, "instruct": instruct, "speed": speed], timeout: 600)
+    }
+
     // MARK: - HTTP
 
     private func isHealthy() async -> Bool {

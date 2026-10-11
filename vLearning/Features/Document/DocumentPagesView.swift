@@ -14,6 +14,7 @@ struct DocumentPagesView: View {
     @State private var showCleanUp = false
     @State private var showPrepare = false
     @State private var showRemoveEverywhere = false
+    @State private var showGenerate = false
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", sentences = "Sentences", original = "Original"
@@ -70,6 +71,12 @@ struct DocumentPagesView: View {
                 .frame(width: document.kind == .pdf ? 270 : 180)
             }
             ToolbarItem(placement: .primaryAction) {
+                Button { showGenerate = true } label: {
+                    Label("Generate Audio", systemImage: "waveform")
+                }
+                .help("Generate the audio with Breeze")
+            }
+            ToolbarItem(placement: .primaryAction) {
                 Button { showPrepare = true } label: {
                     Label("Prepare", systemImage: "text.badge.checkmark")
                 }
@@ -107,6 +114,12 @@ struct DocumentPagesView: View {
         .quickLookPreview($quickLookURL)
         .navigationDestination(isPresented: $showCleanUp) {
             CleanUpView(document: document)
+        }
+        .sheet(isPresented: $showGenerate) {
+            GenerateView(document: document) {
+                // Let the Generate sheet finish dismissing before presenting Prepare.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showPrepare = true }
+            }
         }
         .sheet(isPresented: $showRemoveEverywhere) {
             RemoveEverywhereView(document: document)
@@ -380,6 +393,11 @@ private struct PageCard: View {
     @ViewBuilder
     private var tags: some View {
         HStack(spacing: DS.Space.s) {
+            if page.isPrepared && !page.isSkipped && !page.sentences.isEmpty && page.audioReadyCount > 0 {
+                let ready = page.audioReadyCount, total = page.sentences.count
+                Tag(text: ready == total ? "Audio" : "\(ready)/\(total)", systemImage: "waveform",
+                    color: ready == total ? .indigo : .gray)
+            }
             if page.isPreparedStale {
                 Tag(text: "Changed", systemImage: "arrow.triangle.2.circlepath", color: .orange)
             } else if page.isPrepared && !page.isSkipped {

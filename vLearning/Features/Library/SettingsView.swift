@@ -8,8 +8,7 @@ struct SettingsView: View {
     #if os(macOS)
     @AppStorage(EngineController.pythonPathKey) private var pythonPath: String = EngineController.defaultPythonPath
     #endif
-    @AppStorage("breezeInstruct") private var breezeInstruct: String =
-        "A calm, warm male narrator with a clear, steady pace, like an audiobook reader."
+    @AppStorage(GenerationQueue.voiceKey) private var breezeInstruct: String = GenerationQueue.defaultVoice
 
     var body: some View {
         NavigationStack {

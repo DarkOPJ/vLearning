@@ -79,6 +79,8 @@ final class VLDocument {
     var generationStatusRaw: String
     var generationProgress: Int      // how many pages have audio
     var originalFileBookmark: Data?  // security-scoped bookmark for re-access
+    var audioVoice: String?          // voice description the audio was generated with
+    var generationFraction: Double = 0  // 0...1 while generating
 
     @Relationship(deleteRule: .cascade, inverse: \DocumentPage.document)
     var pages: [DocumentPage]
@@ -93,10 +95,21 @@ final class VLDocument {
         set { generationStatusRaw = newValue.rawValue }
     }
 
-    var progressFraction: Double {
-        guard totalPages > 0 else { return 0 }
-        return Double(generationProgress) / Double(totalPages)
+    var progressFraction: Double { generationFraction }
+
+    /// Pages that will be read (not skipped).
+    var readPages: [DocumentPage] {
+        pages.filter { !$0.isSkipped }.sorted { $0.pageIndex < $1.pageIndex }
     }
+
+    /// Every page that will be read is prepared and unchanged since.
+    var isReadyToGenerate: Bool {
+        !readPages.isEmpty && readPages.allSatisfy { $0.isPrepared && !$0.isPreparedStale }
+    }
+
+    var sentenceCount: Int { readPages.reduce(0) { $0 + $1.sentences.count } }
+    var audioReadyCount: Int { readPages.reduce(0) { $0 + $1.audioReadyCount } }
+    var hasAllAudio: Bool { sentenceCount > 0 && audioReadyCount == sentenceCount }
 
     init(title: String, kind: DocumentKind, totalPages: Int) {
         self.id = UUID()

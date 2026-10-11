@@ -9,6 +9,7 @@ struct LibraryView: View {
 
     @State private var showImportPicker = false
     @State private var showSettings = false
+    @State private var showTasks = false
     @State private var searchText = ""
     @State private var isImporting = false
     @State private var importError: String?
@@ -69,6 +70,9 @@ struct LibraryView: View {
         ) { result in
             handleImport(result)
         }
+        .sheet(isPresented: $showTasks) {
+            BackgroundTasksView()
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
@@ -115,6 +119,16 @@ struct LibraryView: View {
                 Label("Import", systemImage: "plus")
                     .fontWeight(.semibold)
             }
+        }
+        ToolbarItem(placement: .primaryAction) {
+            Button { showTasks = true } label: {
+                if GenerationQueue.shared.isBusy {
+                    Label { Text("Background Tasks") } icon: { ProgressView().controlSize(.small) }
+                } else {
+                    Label("Background Tasks", systemImage: "list.bullet.rectangle")
+                }
+            }
+            .help("Audio generation tasks")
         }
         ToolbarItem(placement: .secondaryAction) {
             Button { showSettings = true } label: {

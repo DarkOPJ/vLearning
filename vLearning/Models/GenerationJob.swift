@@ -17,6 +17,9 @@ final class GenerationJob {
     var errorMessage: String?
     var pagesTotal: Int
     var pagesDone: Int
+    var sentencesTotal: Int = 0
+    var sentencesDone: Int = 0
+    var phase: String?               // e.g. "Loading Breeze…"
 
     var status: JobStatus {
         get { JobStatus(rawValue: statusRaw) ?? .queued }
@@ -24,8 +27,8 @@ final class GenerationJob {
     }
 
     var progress: Double {
-        guard pagesTotal > 0 else { return 0 }
-        return Double(pagesDone) / Double(pagesTotal)
+        guard sentencesTotal > 0 else { return 0 }
+        return Double(sentencesDone) / Double(sentencesTotal)
     }
 
     var isActive: Bool { status == .queued || status == .running }
