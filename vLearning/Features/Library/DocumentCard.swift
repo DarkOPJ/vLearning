@@ -38,14 +38,14 @@ struct DocumentCard: View {
                 .lineLimit(1)
 
             HStack(spacing: DS.Space.xs) {
-                Text(document.kind.displayName)
+                Text(document.kind.rawValue.uppercased())
                     .foregroundStyle(DS.kindColor(for: document.kind))
                     .fontWeight(.medium)
                 dot
                 pageCount
                 if let opened = document.lastOpenedAt {
                     dot
-                    Text(opened, style: .relative)
+                    Text(opened.formatted(.relative(presentation: .named)))
                         .foregroundStyle(.tertiary)
                 } else {
                     dot

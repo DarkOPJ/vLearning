@@ -12,9 +12,12 @@
 		049AD101A293C12FA82AE86F /* vLearningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32560B5EE019AD23C009ED69 /* vLearningApp.swift */; };
 		07067AD391587C2BCE37EEFB /* ReviewPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */; };
 		07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7F6709524488EE4C96546 /* LibraryView.swift */; };
+		11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
+		136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		15046BD8A296DE05365982E8 /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
 		1A0F8D038AECFB73277B9E5D /* VLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */; };
 		1EEBBD69B90AFEE985A6A7AC /* DocumentPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5768C78526C210BF5D74609 /* DocumentPage.swift */; };
+		1F9EA11D335FF21C10F38C03 /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */; };
 		2AAA4C33286D00B8CBDC1E62 /* OOXMLTextParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F13A9B83F506E213B265D56 /* OOXMLTextParser.swift */; };
 		2BA3CF33E37F8015601FA40E /* ExtractedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF6ED6ABB6B2E383E2F0FDE /* ExtractedPage.swift */; };
 		2CD858C899D53E99EBC28A29 /* DocumentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2EEE93B27D7A560D253BCA /* DocumentCard.swift */; };
@@ -51,6 +54,7 @@
 		ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */; };
 		AF3DE51697551EC078F5FEA5 /* GenerationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */; };
 		BAA40EF97A55203147C386BC /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9781245570BBF21722464DD7 /* StatusBadge.swift */; };
+		BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		C236C029EBBA24FBB4933045 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
 		C4490BF4F9756A09661E07E5 /* GenerationPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6286CC51EA7A4F41F4B9257 /* GenerationPlaceholder.swift */; };
 		D2EACD76F9DBFE05D770AC2F /* DocumentPagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5ED18B2E2392879EC8F2E5B /* DocumentPagesView.swift */; };
@@ -74,7 +78,9 @@
 		2AA431CB87D90EF4DE0B24CF /* ReaderPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderPlaceholder.swift; sourceTree = "<group>"; };
 		32560B5EE019AD23C009ED69 /* vLearningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vLearningApp.swift; sourceTree = "<group>"; };
 		3BEE297AE3D940D10CF80452 /* EmptyLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyLibraryView.swift; sourceTree = "<group>"; };
+		48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRSelectionView.swift; sourceTree = "<group>"; };
 		5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPlaceholder.swift; sourceTree = "<group>"; };
+		64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRecognizer.swift; sourceTree = "<group>"; };
 		6CC7F6709524488EE4C96546 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DOCXExtractor.swift; sourceTree = "<group>"; };
 		6E78A97C6B5A09D6663046FE /* PPTXExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTXExtractor.swift; sourceTree = "<group>"; };
@@ -109,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				423099C314870F9742900125 /* Importers */,
+				5605C328FD400E8D2359FE25 /* OCR */,
 				A5C7A71823CB6C66FEC74001 /* DocumentStorage.swift */,
 				9B1B1C7A7A1BEAE85B0F43A9 /* ImageCoding.swift */,
 				205ED3C86A1A3C18666AAA71 /* ZIPReader.swift */,
@@ -154,6 +161,14 @@
 			path = Importers;
 			sourceTree = "<group>";
 		};
+		5605C328FD400E8D2359FE25 /* OCR */ = {
+			isa = PBXGroup;
+			children = (
+				64D9E46FE3AEE628D9EB12B4 /* TextRecognizer.swift */,
+			);
+			path = OCR;
+			sourceTree = "<group>";
+		};
 		61024A6E3E1348701C8773FB /* Library */ = {
 			isa = PBXGroup;
 			children = (
@@ -174,6 +189,14 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		66F97B18C2FF9AD83AC982F6 /* OCR */ = {
+			isa = PBXGroup;
+			children = (
+				48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */,
+			);
+			path = OCR;
+			sourceTree = "<group>";
+		};
 		7BB7B10C63EB8B1A43AAB2BB /* Review */ = {
 			isa = PBXGroup;
 			children = (
@@ -189,6 +212,7 @@
 				FCAE70C00D50BDD4A2AD7BBE /* Generation */,
 				ABDDCEE2EC56845C45BAC528 /* Import */,
 				61024A6E3E1348701C8773FB /* Library */,
+				66F97B18C2FF9AD83AC982F6 /* OCR */,
 				A8E202F4E6DAA6841B9F5217 /* Reader */,
 				7BB7B10C63EB8B1A43AAB2BB /* Review */,
 			);
@@ -375,6 +399,7 @@
 				809B0A879583C2ED04710245 /* ImageCoding.swift in Sources */,
 				D3EDF11C17746863E5E56530 /* ImportPlaceholder.swift in Sources */,
 				07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */,
+				BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */,
 				496F66FB3C966421FCEBE2E1 /* OOXMLTextParser.swift in Sources */,
 				0149F98CF58B0BEB76B4EFDB /* PDFExtractor.swift in Sources */,
 				319C4C649968796967952EDA /* PPTXExtractor.swift in Sources */,
@@ -384,6 +409,7 @@
 				C236C029EBBA24FBB4933045 /* SettingsView.swift in Sources */,
 				BAA40EF97A55203147C386BC /* StatusBadge.swift in Sources */,
 				52974BAABFDC871FC4CFE56F /* StoredImage.swift in Sources */,
+				11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */,
 				5B5C51CEFFC2185748BB9AF5 /* VLDocument.swift in Sources */,
 				6DB1D7D28766271A1718DA8A /* ZIPReader.swift in Sources */,
 				A15B3D06319940012304B67C /* vLearningApp.swift in Sources */,
@@ -408,6 +434,7 @@
 				48B26ED8AED8285724624E24 /* ImageCoding.swift in Sources */,
 				D9BCD41FD3A607F8373FB96E /* ImportPlaceholder.swift in Sources */,
 				E16C5F38694AD77BEA6FE9D2 /* LibraryView.swift in Sources */,
+				136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */,
 				2AAA4C33286D00B8CBDC1E62 /* OOXMLTextParser.swift in Sources */,
 				748077A3CCA3134408493D93 /* PDFExtractor.swift in Sources */,
 				48F3D698F3F455728AA695E8 /* PPTXExtractor.swift in Sources */,
@@ -417,6 +444,7 @@
 				FE1DC33C71709BD41BDAE3A9 /* SettingsView.swift in Sources */,
 				39A761E42604ADE6DB085DD4 /* StatusBadge.swift in Sources */,
 				46C7CA6ACA68EBF9A673070F /* StoredImage.swift in Sources */,
+				1F9EA11D335FF21C10F38C03 /* TextRecognizer.swift in Sources */,
 				1A0F8D038AECFB73277B9E5D /* VLDocument.swift in Sources */,
 				58050246CB4226CE69879E81 /* ZIPReader.swift in Sources */,
 				049AD101A293C12FA82AE86F /* vLearningApp.swift in Sources */,

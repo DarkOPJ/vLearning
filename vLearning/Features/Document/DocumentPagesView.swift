@@ -10,6 +10,7 @@ struct DocumentPagesView: View {
     @State private var mode: Mode = .text
     @State private var quickLookURL: URL?
     @State private var enlargedImage: URL?
+    @State private var showOCR = false
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", original = "Original"
@@ -22,10 +23,15 @@ struct DocumentPagesView: View {
 
     private var pageNoun: String { document.kind == .pptx ? "Slide" : "Page" }
 
+    private var hasOCRCandidates: Bool { document.pages.contains { !$0.ocrCandidates.isEmpty } }
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: DS.Space.l) {
                 header
+                if hasOCRCandidates && !document.pages.contains(where: { !$0.ocrResults.isEmpty }) {
+                    ocrBanner
+                }
                 ForEach(sortedPages) { page in
                     PageCard(
                         page: page,
@@ -59,6 +65,14 @@ struct DocumentPagesView: View {
                     .frame(width: 200)
                 }
             }
+            if hasOCRCandidates {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { showOCR = true } label: {
+                        Label("Read Images", systemImage: "text.viewfinder")
+                    }
+                    .help("Choose which images to read with OCR")
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     quickLookURL = DocumentStorage.originalURL(for: document.id, kind: document.kind)
@@ -69,6 +83,9 @@ struct DocumentPagesView: View {
             }
         }
         .quickLookPreview($quickLookURL)
+        .sheet(isPresented: $showOCR) {
+            OCRSelectionView(document: document)
+        }
         .sheet(item: $enlargedImage) { url in
             ImageViewer(url: url)
         }
@@ -100,6 +117,26 @@ struct DocumentPagesView: View {
             }
         }
         .padding(.bottom, DS.Space.s)
+    }
+
+    private var ocrBanner: some View {
+        HStack(spacing: DS.Space.m) {
+            Image(systemName: "text.viewfinder")
+                .font(.title3)
+                .foregroundStyle(Color.accentColor)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Text inside images")
+                    .font(.headline)
+                Text("Pick the images and scanned pages you want read aloud.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: DS.Space.s)
+            Button("Choose") { showOCR = true }
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(DS.Space.l)
+        .cardStyle()
     }
 
     private func summary(pages: Int, images: Int, scanned: Int) -> String {
@@ -144,6 +181,7 @@ private struct PageCard: View {
         HStack(spacing: DS.Space.s) {
             Text(title).sectionHeaderStyle()
             Spacer()
+            if !page.ocrText.isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
             if page.isLikelyScanned { Tag(text: "Scanned", systemImage: "doc.viewfinder", color: .orange) }
             if !page.notesText.isEmpty { Tag(text: "Notes", systemImage: "note.text", color: .purple) }
             if !page.tablesText.isEmpty { Tag(text: "Table", systemImage: "tablecells", color: .teal) }
@@ -155,7 +193,9 @@ private struct PageCard: View {
 
     @ViewBuilder
     private var textContent: some View {
-        if page.extractedText.isEmpty {
+        if page.extractedText.isEmpty && !page.ocrText.isEmpty {
+            EmptyView()
+        } else if page.extractedText.isEmpty {
             Text(page.isLikelyScanned
                  ? "No selectable text. This looks like a scanned page; its text will come from OCR."
                  : "No text on this page.")
@@ -167,6 +207,15 @@ private struct PageCard: View {
                 .font(.body)
                 .lineSpacing(4)
                 .textSelection(.enabled)
+        }
+
+        if !page.ocrText.isEmpty {
+            LabeledBlock(label: "Text from images") {
+                Text(page.ocrText)
+                    .font(.body)
+                    .lineSpacing(4)
+                    .textSelection(.enabled)
+            }
         }
 
         if !page.tablesText.isEmpty {
