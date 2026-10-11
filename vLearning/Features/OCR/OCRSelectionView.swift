@@ -40,7 +40,11 @@ struct OCRSelectionView: View {
     private var isRunning: Bool { running != nil }
 
     var body: some View {
-        NavigationStack {
+        // A custom header instead of a toolbar: macOS sheets have no title bar,
+        // so toolbar buttons there are hidden or moved.
+        VStack(spacing: 0) {
+            header
+            Divider()
             Group {
                 if pages.isEmpty {
                     ContentUnavailableView(
@@ -54,11 +58,7 @@ struct OCRSelectionView: View {
                     grid
                 }
             }
-            .navigationTitle(viewingHidden ? "Hidden Images" : "Choose Images to Read")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar { toolbar }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .bottom) { if !pages.isEmpty && !viewingHidden { bottomBar } }
         }
         #if os(macOS)
@@ -237,46 +237,51 @@ struct OCRSelectionView: View {
 
     // MARK: - Bars
 
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
+    private var header: some View {
+        HStack(spacing: DS.Space.m) {
             Button(isRunning ? "Stop" : "Cancel") {
                 if isRunning { running?.cancel() } else { dismiss() }
             }
-        }
-        if !pages.isEmpty && viewingHidden {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Unhide All") {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        for page in pages { page.hiddenOCRPaths.removeAll() }
+            .keyboardShortcut(.cancelAction)
+
+            Text(viewingHidden ? "Hidden Images" : "Choose Images to Read")
+                .font(.headline)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+
+            if !pages.isEmpty {
+                if viewingHidden {
+                    Button("Unhide All") {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            for page in pages { page.hiddenOCRPaths.removeAll() }
+                        }
                     }
+                    .disabled(hiddenCount == 0)
+                } else {
+                    let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
+                    Button(allSelected ? "Select None" : "Select All") {
+                        if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
+                    }
+                    .disabled(isRunning || allVisible.isEmpty)
                 }
-                .disabled(hiddenCount == 0)
-            }
-        }
-        if !pages.isEmpty && !viewingHidden {
-            ToolbarItem(placement: .primaryAction) {
-                let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
-                Button(allSelected ? "Select None" : "Select All") {
-                    if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
-                }
-                .disabled(isRunning || allVisible.isEmpty)
-            }
-        }
-        if !pages.isEmpty {
-            // Last item, so it sits at the far right of the title bar.
-            ToolbarItem(placement: .primaryAction) {
+
+                // Far right: switch between choosing images and the hidden images.
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) { viewingHidden.toggle() }
                 } label: {
-                    Label(viewingHidden ? "Back to Images" : "Hidden (\(hiddenCount))",
+                    Label(viewingHidden ? "Back" : "Hidden (\(hiddenCount))",
                           systemImage: viewingHidden ? "photo.on.rectangle" : "eye.slash")
-                        .labelStyle(.titleAndIcon)
                 }
+                .buttonStyle(.bordered)
+                .tint(viewingHidden ? Color.accentColor : nil)
                 .disabled(isRunning)
                 .help(viewingHidden ? "Back to choosing images" : "Show hidden images")
             }
         }
+        .buttonStyle(.borderless)
+        .padding(.horizontal, DS.Space.l)
+        .padding(.vertical, DS.Space.m)
+        .background(.bar)
     }
 
     private var bottomBar: some View {
