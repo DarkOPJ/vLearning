@@ -12,7 +12,7 @@ struct OCRSelectionView: View {
     @State private var done = 0
     @State private var total = 0
     @State private var failures = 0
-    @State private var hiddenExpanded = true
+    @State private var viewingHidden = false
 
     private var pages: [DocumentPage] {
         document.pages
@@ -48,16 +48,18 @@ struct OCRSelectionView: View {
                         systemImage: "photo.on.rectangle",
                         description: Text("This document has no images or scanned pages to read.")
                     )
+                } else if viewingHidden {
+                    hiddenGrid
                 } else {
                     grid
                 }
             }
-            .navigationTitle("Choose Images to Read")
+            .navigationTitle(viewingHidden ? "Hidden Images" : "Choose Images to Read")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar { toolbar }
-            .safeAreaInset(edge: .bottom) { if !pages.isEmpty { bottomBar } }
+            .safeAreaInset(edge: .bottom) { if !pages.isEmpty && !viewingHidden { bottomBar } }
         }
         #if os(macOS)
         .frame(minWidth: 680, minHeight: 560)
@@ -77,7 +79,7 @@ struct OCRSelectionView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 if visiblePages.isEmpty {
-                    Text("All images are hidden.")
+                    Text("All images are hidden. Use \(Image(systemName: "eye.slash")) Hidden at the top to bring them back.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
@@ -94,10 +96,6 @@ struct OCRSelectionView: View {
                         }
                     }
                 }
-
-                if hiddenCount > 0 {
-                    hiddenSection
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DS.Space.xl)
@@ -106,48 +104,37 @@ struct OCRSelectionView: View {
     }
 
     /// Hidden images, per page, each with its own unhide button.
-    private var hiddenSection: some View {
-        VStack(alignment: .leading, spacing: DS.Space.l) {
-            Divider()
-            HStack {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { hiddenExpanded.toggle() }
-                } label: {
-                    HStack(spacing: DS.Space.s) {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 11, weight: .bold))
-                            .rotationEffect(.degrees(hiddenExpanded ? 90 : 0))
-                        Image(systemName: "eye.slash")
-                        Text("Hidden Images (\(hiddenCount))")
-                            .font(.headline)
-                    }
-                    .foregroundStyle(.secondary)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                Spacer()
-                Button("Unhide All") {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        for page in pages { page.hiddenOCRPaths.removeAll() }
-                    }
-                }
-                .buttonStyle(.borderless)
-            }
+    private var hiddenGrid: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: DS.Space.xl) {
+                if hiddenPages.isEmpty {
+                    ContentUnavailableView(
+                        "No Hidden Images",
+                        systemImage: "eye",
+                        description: Text("Images you hide will appear here.")
+                    )
+                    .padding(.top, DS.Space.huge)
+                } else {
+                    Text("Tap an image to unhide it. It goes back to its page in Choose Images to Read.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
 
-            if hiddenExpanded {
-                ForEach(hiddenPages) { page in
-                    VStack(alignment: .leading, spacing: DS.Space.m) {
-                        Text("\(pageNoun) \(page.pageIndex + 1)").sectionHeaderStyle()
-                        LazyVGrid(columns: columns, alignment: .leading, spacing: DS.Space.m) {
-                            ForEach(hiddenCandidates(page), id: \.self) { path in
-                                hiddenTile(path: path, page: page)
+                    ForEach(hiddenPages) { page in
+                        VStack(alignment: .leading, spacing: DS.Space.m) {
+                            Text("\(pageNoun) \(page.pageIndex + 1)").sectionHeaderStyle()
+                            LazyVGrid(columns: columns, alignment: .leading, spacing: DS.Space.m) {
+                                ForEach(hiddenCandidates(page), id: \.self) { path in
+                                    hiddenTile(path: path, page: page)
+                                }
                             }
                         }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(DS.Space.xl)
         }
-        .padding(.top, DS.Space.s)
     }
 
     private func hiddenTile(path: String, page: DocumentPage) -> some View {
@@ -257,13 +244,37 @@ struct OCRSelectionView: View {
                 if isRunning { running?.cancel() } else { dismiss() }
             }
         }
-        if !pages.isEmpty {
+        if !pages.isEmpty && viewingHidden {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Unhide All") {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        for page in pages { page.hiddenOCRPaths.removeAll() }
+                    }
+                }
+                .disabled(hiddenCount == 0)
+            }
+        }
+        if !pages.isEmpty && !viewingHidden {
             ToolbarItem(placement: .primaryAction) {
                 let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
                 Button(allSelected ? "Select None" : "Select All") {
                     if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
                 }
                 .disabled(isRunning || allVisible.isEmpty)
+            }
+        }
+        if !pages.isEmpty {
+            // Last item, so it sits at the far right of the title bar.
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { viewingHidden.toggle() }
+                } label: {
+                    Label(viewingHidden ? "Back to Images" : "Hidden (\(hiddenCount))",
+                          systemImage: viewingHidden ? "photo.on.rectangle" : "eye.slash")
+                        .labelStyle(.titleAndIcon)
+                }
+                .disabled(isRunning)
+                .help(viewingHidden ? "Back to choosing images" : "Show hidden images")
             }
         }
     }
