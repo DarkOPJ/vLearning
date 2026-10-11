@@ -166,6 +166,8 @@ private struct PageCard: View {
     let showOriginal: Bool
     let onImageTap: (URL) -> Void
 
+    @State private var isEditing = false
+
     private func url(_ relative: String) -> URL {
         DocumentStorage.url(for: documentId, relativePath: relative)
     }
@@ -175,7 +177,9 @@ private struct PageCard: View {
             headerRow
 
             Group {
-                if showOriginal, let preview = page.previewImagePath {
+                if isEditing {
+                    editContent
+                } else if showOriginal, let preview = page.previewImagePath {
                     StoredImage(url: url(preview), maxPixelSize: 1600)
                         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
                         .onTapGesture { onImageTap(url(preview)) }
@@ -190,6 +194,31 @@ private struct PageCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
         .animation(.easeInOut(duration: 0.2), value: page.isSkipped)
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
+    }
+
+    /// Inline editors for each section, the same ones Clean Up uses.
+    @ViewBuilder
+    private var editContent: some View {
+        if page.presentSections.isEmpty {
+            Text("No text on this page to edit.")
+                .font(.callout)
+                .italic()
+                .foregroundStyle(.secondary)
+        } else {
+            VStack(alignment: .leading, spacing: DS.Space.l) {
+                ForEach(page.presentSections) { section in
+                    SectionEditor(page: page, section: section, embedded: true)
+                }
+                if page.hasEdits {
+                    Button("Restore Original Text", role: .destructive) {
+                        for section in DocumentPage.Section.allCases { page.setEditedText(nil, for: section) }
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                }
+            }
+        }
     }
 
     private var headerRow: some View {
@@ -199,14 +228,32 @@ private struct PageCard: View {
             tags
                 .opacity(page.isSkipped ? 0.45 : 1)
                 .saturation(page.isSkipped ? 0 : 1)
+            editButton
             skipButton
         }
+    }
+
+    /// Edit → Editing (text boxes open) → Edited once there are changes. Click again to edit or revert.
+    private var editButton: some View {
+        Button {
+            isEditing.toggle()
+        } label: {
+            Text(isEditing ? "Editing" : (page.hasEdits ? "Edited" : "Edit"))
+                .font(.system(.caption, weight: .semibold))
+                .frame(minWidth: 52)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .tint(isEditing || page.hasEdits ? Color.accentColor : nil)
+        .disabled(page.isSkipped)
+        .help(isEditing ? "Click when you're done editing" : "Edit this page's text")
     }
 
     /// Skips the whole page (it won't be read). Click again to bring it back.
     private var skipButton: some View {
         Button {
             page.isSkipped.toggle()
+            if page.isSkipped { isEditing = false }
         } label: {
             Text(page.isSkipped ? "Skipped" : "Skip")
                 .font(.system(.caption, weight: .semibold))
@@ -221,7 +268,6 @@ private struct PageCard: View {
     @ViewBuilder
     private var tags: some View {
         HStack(spacing: DS.Space.s) {
-            if page.hasEdits { Tag(text: "Edited", systemImage: "pencil", color: Color.accentColor) }
             if !page.cleanText(.ocr).isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
             if page.isLikelyScanned { Tag(text: "Scanned", systemImage: "doc.viewfinder", color: .orange) }
             if !page.cleanText(.notes).isEmpty { Tag(text: "Notes", systemImage: "note.text", color: .purple) }
