@@ -18,6 +18,12 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_vlearning._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>vLearning syncs your documents and audio with vLearning on your Mac over your Wi-Fi.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

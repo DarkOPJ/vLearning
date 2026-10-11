@@ -69,4 +69,12 @@ and dark mode.
    Original view for PPTX/DOCX: `PageRenderService` converts to PDF on the Mac (LibreOffice if installed,
    else Keynote/Pages via AppleScript), saves `rendered/<i>.jpg`, and maps pages/sentences to rendered
    pages by their words (Word reflows, so page counts can differ). Runs after import and on demand.
-9. Wi-Fi sync
+9. Wi-Fi sync (done: `Services/Sync/`). The Mac listens (`SyncServer`, Bonjour `_vlearning._tcp`), the
+   iPhone connects (`SyncClient`) and drives a round every 15 s while open (4 s while the Mac generates
+   for it). Pairing: 6-digit code in the Mac's Settings › iPhone Sync, gives the iPhone a token.
+   Frames: UInt32 header len | JSON header | UInt64 body len | body (`SyncWire`). Content and reading
+   position sync separately; `SyncTracker` hashes each document's snapshot after saves to know when it
+   changed, and the newer change wins. Deletions sync via tombstones. Files: the whole document folder,
+   by path and size; audio the winner no longer has is removed. The Mac refuses a push while it's
+   generating that document. The iPhone can ask the Mac to generate (`generate` request).
+   "Delete Audio" removes only a document's generated audio (toolbar and library context menu).

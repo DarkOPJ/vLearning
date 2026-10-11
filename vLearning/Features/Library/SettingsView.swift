@@ -55,6 +55,8 @@ struct SettingsView: View {
                 }
                 #endif
 
+                SyncSettingsSection()
+
                 Section("Voice (Breeze — Mac only)") {
                     VStack(alignment: .leading, spacing: DS.Space.s) {
                         Text("Voice description")

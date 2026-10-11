@@ -51,12 +51,16 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - vLearning
+      - path: vLearning
+        excludes: ["iOS-Info.plist", "macOS-Info.plist"]
     info:
       path: vLearning/iOS-Info.plist
       properties:
         # Keep reading aloud with the screen locked or in another app.
         UIBackgroundModes: [audio]
+        # Wi-Fi sync with the Mac (Bonjour on the local network).
+        NSLocalNetworkUsageDescription: "vLearning syncs your documents and audio with vLearning on your Mac over your Wi-Fi."
+        NSBonjourServices: [_vlearning._tcp]
     settings:
       base:
         SDKROOT: iphoneos
@@ -71,10 +75,17 @@ targets:
     platform: macOS
     deploymentTarget: "14.0"
     sources:
-      - vLearning
+      - path: vLearning
+        excludes: ["iOS-Info.plist", "macOS-Info.plist"]
       # The Python engine ships inside the Mac app; the app runs it on demand.
       - path: engine/server.py
         buildPhase: resources
+    info:
+      path: vLearning/macOS-Info.plist
+      properties:
+        # Wi-Fi sync with the iPhone (Bonjour on the local network).
+        NSLocalNetworkUsageDescription: "vLearning syncs your documents and audio with vLearning on your iPhone over your Wi-Fi."
+        NSBonjourServices: [_vlearning._tcp]
     entitlements:
       path: vLearning/macOS.entitlements
       properties:
