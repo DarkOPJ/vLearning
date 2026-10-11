@@ -40,8 +40,8 @@ struct OCRSelectionView: View {
     private var isRunning: Bool { running != nil }
 
     var body: some View {
-        // A custom header instead of a toolbar: macOS sheets have no title bar,
-        // so toolbar buttons there are hidden or moved.
+        // Own title and button bar instead of a toolbar: macOS sheets have no
+        // title bar, so toolbar buttons there are hidden or moved.
         VStack(spacing: 0) {
             header
             Divider()
@@ -59,7 +59,8 @@ struct OCRSelectionView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom) { if !pages.isEmpty && !viewingHidden { bottomBar } }
+            Divider()
+            bottomBar
         }
         #if os(macOS)
         .frame(minWidth: 680, minHeight: 560)
@@ -238,52 +239,21 @@ struct OCRSelectionView: View {
     // MARK: - Bars
 
     private var header: some View {
-        HStack(spacing: DS.Space.m) {
-            Button(isRunning ? "Stop" : "Cancel") {
-                if isRunning { running?.cancel() } else { dismiss() }
-            }
-            .keyboardShortcut(.cancelAction)
-
+        VStack(spacing: 2) {
             Text(viewingHidden ? "Hidden Images" : "Choose Images to Read")
                 .font(.headline)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity)
-
-            if !pages.isEmpty {
-                if viewingHidden {
-                    Button("Unhide All") {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            for page in pages { page.hiddenOCRPaths.removeAll() }
-                        }
-                    }
-                    .disabled(hiddenCount == 0)
-                } else {
-                    let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
-                    Button(allSelected ? "Select None" : "Select All") {
-                        if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
-                    }
-                    .disabled(isRunning || allVisible.isEmpty)
-                }
-
-                // Far right: switch between choosing images and the hidden images.
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { viewingHidden.toggle() }
-                } label: {
-                    Label(viewingHidden ? "Back" : "Hidden (\(hiddenCount))",
-                          systemImage: viewingHidden ? "photo.on.rectangle" : "eye.slash")
-                }
-                .buttonStyle(.bordered)
-                .tint(viewingHidden ? Color.accentColor : nil)
-                .disabled(isRunning)
-                .help(viewingHidden ? "Back to choosing images" : "Show hidden images")
+            if !pages.isEmpty && !viewingHidden && selected.count > 0 {
+                Text("\(selected.count) selected")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
-        .buttonStyle(.borderless)
-        .padding(.horizontal, DS.Space.l)
+        .frame(maxWidth: .infinity)
         .padding(.vertical, DS.Space.m)
         .background(.bar)
     }
 
+    /// Cancel and the Hidden/Back toggle on the left; Select All and the main action on the right.
     private var bottomBar: some View {
         VStack(spacing: DS.Space.s) {
             if isRunning {
@@ -292,22 +262,57 @@ struct OCRSelectionView: View {
                         .font(.callout)
                 }
                 .tint(Color.accentColor)
-            } else {
-                if failures > 0 {
-                    Label("\(failures) image\(failures == 1 ? "" : "s") couldn't be read.",
-                          systemImage: "exclamationmark.triangle.fill")
-                        .font(.callout)
-                        .foregroundStyle(.orange)
-                }
-                Button(action: run) {
-                    Text(runLabel)
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(selected.isEmpty && !hadSelection)
+            } else if failures > 0 && !viewingHidden {
+                Label("\(failures) image\(failures == 1 ? "" : "s") couldn't be read.",
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.orange)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
+
+            HStack(spacing: DS.Space.m) {
+                Button(isRunning ? "Stop" : "Cancel") {
+                    if isRunning { running?.cancel() } else { dismiss() }
+                }
+                .keyboardShortcut(.cancelAction)
+
+                if !pages.isEmpty {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { viewingHidden.toggle() }
+                    } label: {
+                        Text(viewingHidden ? "Back to Images" : "See Hidden (\(hiddenCount))")
+                    }
+                    .disabled(isRunning)
+                    .help(viewingHidden ? "Back to choosing images" : "Show hidden images")
+                }
+
+                Spacer(minLength: DS.Space.s)
+
+                if !pages.isEmpty {
+                    if viewingHidden {
+                        Button("Unhide All") {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                for page in pages { page.hiddenOCRPaths.removeAll() }
+                            }
+                        }
+                        .disabled(hiddenCount == 0)
+                    } else {
+                        let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
+                        Button(allSelected ? "Select None" : "Select All") {
+                            if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
+                        }
+                        .disabled(isRunning || allVisible.isEmpty)
+
+                        Button(action: run) {
+                            Text(runLabel).fontWeight(.semibold)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(isRunning || (selected.isEmpty && !hadSelection))
+                    }
+                }
+            }
+            .controlSize(.large)
         }
         .padding(DS.Space.l)
         .background(.bar)
