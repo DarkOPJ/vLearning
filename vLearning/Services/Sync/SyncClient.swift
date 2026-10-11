@@ -82,16 +82,25 @@ final class SyncClient {
         browser = nil
         guard let loop else { return }
         // Wake the loop: it runs one more round, sees the app is in the background and stops.
-        var taskId = UIBackgroundTaskIdentifier.invalid
-        taskId = UIApplication.shared.beginBackgroundTask(withName: "vLearning sync") { [weak self] in
-            self?.disconnect()
-            UIApplication.shared.endBackgroundTask(taskId)
+        endBackgroundWork()
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "vLearning sync") {
+            // Out of background time: stop now (called on the main thread).
+            MainActor.assumeIsolated { SyncClient.shared.endBackgroundWork(disconnecting: true) }
         }
         nap?.cancel()
         Task {
             await loop.value
-            UIApplication.shared.endBackgroundTask(taskId)
+            endBackgroundWork()
         }
+    }
+
+    private var backgroundTask = UIBackgroundTaskIdentifier.invalid
+
+    private func endBackgroundWork(disconnecting: Bool = false) {
+        if disconnecting { disconnect() }
+        guard backgroundTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(backgroundTask)
+        backgroundTask = .invalid
     }
 
     // MARK: - Pairing
