@@ -5,6 +5,25 @@ options:
   createIntermediateGroups: true
   groupSortPosition: top
   xcodeVersion: "16"
+  generateEmptyDirectories: true
+
+schemes:
+  vLearning_iOS:
+    build:
+      targets:
+        vLearning_iOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+  vLearning_macOS:
+    build:
+      targets:
+        vLearning_macOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release
 
 configs:
   Debug: debug
