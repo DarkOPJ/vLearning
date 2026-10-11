@@ -36,9 +36,9 @@ final class OOXMLTextParser: NSObject, XMLParserDelegate {
         switch element {
         case "a:tbl", "w:tbl":
             tableDepth += 1
-        case "a:tr", "w:tr" where tableDepth > 0:
+        case "a:tr", "w:tr":
             rowCells = []
-        case "a:tc", "w:tc" where tableDepth > 0:
+        case "a:tc", "w:tc":
             inCell = true
             cellParas = []
         case "a:p", "w:p":
@@ -83,12 +83,12 @@ final class OOXMLTextParser: NSObject, XMLParserDelegate {
             }
             currentPara = ""
 
-        case "a:tc", "w:tc" where tableDepth > 0:
+        case "a:tc", "w:tc":
             inCell = false
             let cellText = cellParas.joined(separator: " ")
             rowCells.append(cellText)
 
-        case "a:tr", "w:tr" where tableDepth > 0:
+        case "a:tr", "w:tr":
             if !rowCells.isEmpty {
                 tableLines.append(rowCells.joined(separator: "\t"))
             }
