@@ -15,6 +15,7 @@ final class DocumentPage {
     var selectedImageIndices: [Int]  // unused; superseded by ocrSelectedPaths
     var ocrSelectedPaths: [String] = []      // images (or the page preview) chosen for OCR
     var ocrResults: [String: String] = [:]   // relative image path → recognized text
+    var hiddenOCRPaths: [String] = []        // images hidden from the OCR picker
     var audioFilePath: String?       // generated .m4a, relative to the document's storage folder
 
     var document: VLDocument?

@@ -12,6 +12,7 @@ struct OCRSelectionView: View {
     @State private var done = 0
     @State private var total = 0
     @State private var failures = 0
+    @State private var showHidden = false
 
     private var pages: [DocumentPage] {
         document.pages
@@ -19,7 +20,15 @@ struct OCRSelectionView: View {
             .sorted { $0.pageIndex < $1.pageIndex }
     }
 
-    private var allCandidates: [String] { pages.flatMap(\.ocrCandidates) }
+    /// Candidates shown in the grid: hidden images are left out unless "Show Hidden" is on.
+    private func visibleCandidates(_ page: DocumentPage) -> [String] {
+        showHidden ? page.ocrCandidates : page.ocrCandidates.filter { !page.hiddenOCRPaths.contains($0) }
+    }
+
+    private var visiblePages: [DocumentPage] { pages.filter { !visibleCandidates($0).isEmpty } }
+    private var allVisible: [String] { visiblePages.flatMap(visibleCandidates) }
+    private var hiddenCount: Int { pages.reduce(0) { $0 + $1.hiddenOCRPaths.count } }
+    private var hadSelection: Bool { pages.contains { !$0.ocrSelectedPaths.isEmpty } }
     private var pageNoun: String { document.kind == .pptx ? "Slide" : "Page" }
     private var isRunning: Bool { running != nil }
 
@@ -55,22 +64,33 @@ struct OCRSelectionView: View {
     private var grid: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: DS.Space.xl) {
-                Text("Only the images you select are read with OCR. Their text is added to the page they're on.")
+                Text("Only the images you select are read with OCR. Their text is added to the page they're on. Hide images you don't need with \(Image(systemName: "eye.slash")).")
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                ForEach(pages) { page in
-                    VStack(alignment: .leading, spacing: DS.Space.s) {
+                if visiblePages.isEmpty {
+                    Text("All images are hidden.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, DS.Space.huge)
+                }
+
+                ForEach(visiblePages) { page in
+                    VStack(alignment: .leading, spacing: DS.Space.m) {
                         Text("\(pageNoun) \(page.pageIndex + 1)").sectionHeaderStyle()
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: DS.Space.m)],
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160, maximum: 240), spacing: DS.Space.m)],
+                                  alignment: .leading,
                                   spacing: DS.Space.m) {
-                            ForEach(page.ocrCandidates, id: \.self) { path in
+                            ForEach(visibleCandidates(page), id: \.self) { path in
                                 tile(path: path, page: page)
                             }
                         }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DS.Space.xl)
         }
         .disabled(isRunning)
@@ -80,15 +100,21 @@ struct OCRSelectionView: View {
         let isSelected = selected.contains(path)
         let isWholePage = path == page.previewImagePath
         let hasResult = page.ocrResults[path] != nil
+        let isHidden = page.hiddenOCRPaths.contains(path)
+        let shape = RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
 
         return Button {
             if isSelected { selected.remove(path) } else { selected.insert(path) }
         } label: {
-            StoredImage(url: DocumentStorage.url(for: document.id, relativePath: path),
-                        maxPixelSize: 400, contentMode: .fill)
-                .frame(height: 120)
+            // A fixed-height clear cell sizes the tile; the image only fills (and is clipped to) it.
+            Color.secondary.opacity(0.10)
+                .frame(height: 130)
                 .frame(maxWidth: .infinity)
-                .clipped()
+                .overlay {
+                    StoredImage(url: DocumentStorage.url(for: document.id, relativePath: path),
+                                maxPixelSize: 480, contentMode: .fill)
+                }
+                .clipShape(shape)
                 .overlay(alignment: .topTrailing) {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.title3)
@@ -103,14 +129,29 @@ struct OCRSelectionView: View {
                     }
                     .padding(DS.Space.s)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                        .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 3)
+                    shape.strokeBorder(isSelected ? Color.accentColor : Color.secondary.opacity(0.25),
+                                       lineWidth: isSelected ? 3 : 1)
                 }
-                .contentShape(Rectangle())
+                .opacity(isHidden ? 0.45 : 1)
+                .contentShape(shape)
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .topLeading) {
+            Button {
+                toggleHidden(path, on: page)
+            } label: {
+                Image(systemName: isHidden ? "eye" : "eye.slash")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 26, height: 26)
+                    .background(.black.opacity(0.55), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(DS.Space.s)
+            .help(isHidden ? "Show this image" : "Hide this image")
+            .accessibilityLabel(isHidden ? "Show image" : "Hide image")
+        }
         .accessibilityLabel(isWholePage ? "Whole page" : "Image")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -135,8 +176,17 @@ struct OCRSelectionView: View {
         }
         if !pages.isEmpty {
             ToolbarItem(placement: .primaryAction) {
-                Button(selected.count == allCandidates.count ? "Select None" : "Select All") {
-                    selected = selected.count == allCandidates.count ? [] : Set(allCandidates)
+                let allSelected = !allVisible.isEmpty && allVisible.allSatisfy(selected.contains)
+                Button(allSelected ? "Select None" : "Select All") {
+                    if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
+                }
+                .disabled(isRunning || allVisible.isEmpty)
+            }
+        }
+        if hiddenCount > 0 || showHidden {
+            ToolbarItem(placement: .secondaryAction) {
+                Toggle(isOn: $showHidden.animation()) {
+                    Label("Show Hidden (\(hiddenCount))", systemImage: "eye")
                 }
                 .disabled(isRunning)
             }
@@ -165,6 +215,7 @@ struct OCRSelectionView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .disabled(selected.isEmpty && !hadSelection)
             }
         }
         .padding(DS.Space.l)
@@ -173,7 +224,7 @@ struct OCRSelectionView: View {
 
     private var runLabel: String {
         let pending = selected.filter { path in !pages.contains { $0.ocrResults[path] != nil } }.count
-        if selected.isEmpty { return "Continue Without OCR" }
+        if selected.isEmpty { return hadSelection ? "Remove Text from Images" : "Select Images to Read" }
         if pending == 0 { return "Save Selection" }
         return "Read \(pending) Image\(pending == 1 ? "" : "s")"
     }
@@ -214,6 +265,17 @@ struct OCRSelectionView: View {
             applySelection()
             running = nil
             if !Task.isCancelled && failures == 0 { dismiss() }
+        }
+    }
+
+    private func toggleHidden(_ path: String, on page: DocumentPage) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if let i = page.hiddenOCRPaths.firstIndex(of: path) {
+                page.hiddenOCRPaths.remove(at: i)
+            } else {
+                page.hiddenOCRPaths.append(path)
+                selected.remove(path)
+            }
         }
     }
 
