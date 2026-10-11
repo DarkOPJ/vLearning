@@ -86,6 +86,7 @@
 		9B6D5C80810C147FD88FC9A9 /* VoiceSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB154094684542A818CE8A74 /* VoiceSettingsSection.swift */; };
 		A15B3D06319940012304B67C /* vLearningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32560B5EE019AD23C009ED69 /* vLearningApp.swift */; };
 		A4DF12BBE2B709704C8ABAE4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BE3E43E4B7A597063BC3A1 /* RootView.swift */; };
+		AA08DC792C16A2BE488B3587 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175E9853220AD4F84710A8 /* LogoView.swift */; };
 		ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */; };
 		AF3DE51697551EC078F5FEA5 /* GenerationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */; };
 		AF41C8A937E998528EB2226F /* TextRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86395D495B5F84BA3BD61953 /* TextRemover.swift */; };
@@ -120,6 +121,7 @@
 		EE641DFE889DD01276AE2BD1 /* SyncServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1655B4A1B56856914D1FF00D /* SyncServer.swift */; };
 		F5061FDBAE27B2080030AA54 /* AudioEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E0C42F247232E0796B23B /* AudioEncoder.swift */; };
 		F6E987FA7244EF9FE7C02052 /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12CB86B294DA0EEC23EA4D95 /* ReaderView.swift */; };
+		F8DC077DD07615E2A0283C26 /* LogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175E9853220AD4F84710A8 /* LogoView.swift */; };
 		FC1A331420DB7DCBD868A4D8 /* SyncClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC36CA0A3E1EE1227BCFDDF6 /* SyncClient.swift */; };
 		FE1DC33C71709BD41BDAE3A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
 /* End PBXBuildFile section */
@@ -168,6 +170,7 @@
 		9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationJob.swift; sourceTree = "<group>"; };
 		9D47A55D915539711D181568 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		A31C3DCC119A9DB921E70540 /* DocumentSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSnapshot.swift; sourceTree = "<group>"; };
+		A5175E9853220AD4F84710A8 /* LogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoView.swift; sourceTree = "<group>"; };
 		A5C7A71823CB6C66FEC74001 /* DocumentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStorage.swift; sourceTree = "<group>"; };
 		A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveEverywhereView.swift; sourceTree = "<group>"; };
 		A917CB5B6716C3E333C69E26 /* PrepareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareView.swift; sourceTree = "<group>"; };
@@ -318,6 +321,7 @@
 		61DDAE728724EB450FB53259 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				A5175E9853220AD4F84710A8 /* LogoView.swift */,
 				9781245570BBF21722464DD7 /* StatusBadge.swift */,
 				E8A2C4B9762614F6A2E1684A /* StoredImage.swift */,
 			);
@@ -605,6 +609,7 @@
 				809B0A879583C2ED04710245 /* ImageCoding.swift in Sources */,
 				D3EDF11C17746863E5E56530 /* ImportPlaceholder.swift in Sources */,
 				07954A9028ADB9210603F6EA /* LibraryView.swift in Sources */,
+				F8DC077DD07615E2A0283C26 /* LogoView.swift in Sources */,
 				21D9FE70CB0988A3C47E2905 /* Notifier.swift in Sources */,
 				6756FFAB56BF0AD5E83749E6 /* NowPlayingBar.swift in Sources */,
 				BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */,
@@ -668,6 +673,7 @@
 				48B26ED8AED8285724624E24 /* ImageCoding.swift in Sources */,
 				D9BCD41FD3A607F8373FB96E /* ImportPlaceholder.swift in Sources */,
 				E16C5F38694AD77BEA6FE9D2 /* LibraryView.swift in Sources */,
+				AA08DC792C16A2BE488B3587 /* LogoView.swift in Sources */,
 				E49318AD4F93936BF1CB45E5 /* Notifier.swift in Sources */,
 				1DD94979D6677A3B85ADAC6A /* NowPlayingBar.swift in Sources */,
 				136BAD67847E80B909CDAD93 /* OCRSelectionView.swift in Sources */,

@@ -59,6 +59,9 @@ struct SettingsView: View {
                 VoiceSettingsSection()
 
                 Section("About") {
+                    LogoView(markHeight: 40)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, DS.Space.s)
                     LabeledContent("Version", value: "1.0")
                     LabeledContent("Engine", value: "Breeze-TTS-2 (Mac) · Apple TTS (iPhone)")
                 }

@@ -8,7 +8,7 @@ struct EmptyLibraryView: View {
             Spacer()
 
             VStack(spacing: DS.Space.xl) {
-                iconStack
+                LogoView(markHeight: 72)
 
                 VStack(spacing: DS.Space.s) {
                     Text("No Documents Yet")
@@ -32,30 +32,6 @@ struct EmptyLibraryView: View {
     }
 
     // MARK: - Subviews
-
-    private var iconStack: some View {
-        ZStack {
-            ForEach(Array(DocumentKind.allCases.enumerated()), id: \.offset) { idx, kind in
-                let offsets: [(CGFloat, CGFloat, Double)] = [
-                    (-28, -8, -12),
-                    (28, -8, 12),
-                    (0, 4, 0),
-                ]
-                let (dx, dy, angle) = offsets[idx]
-                RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                    .fill(DS.kindColor(for: kind).opacity(0.12))
-                    .frame(width: 64, height: 80)
-                    .overlay {
-                        Image(systemName: kind.sfSymbol)
-                            .font(.system(size: 28, weight: .light))
-                            .foregroundStyle(DS.kindColor(for: kind))
-                    }
-                    .rotationEffect(.degrees(angle))
-                    .offset(x: dx, y: dy)
-            }
-        }
-        .frame(height: 120)
-    }
 
     private var importButton: some View {
         Button(action: onImport) {
