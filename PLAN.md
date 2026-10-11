@@ -48,6 +48,12 @@ Speed 0.5–2x, voice picker, resume position, tap a sentence to jump there, ski
 sleep timer, library with progress, M4A export, storage management. Modern minimal design with light
 and dark mode.
 
+## Engine setup (Mac)
+- Python env: `~/Documents/xcode/vlearning-lab/.venv` (mlx-audio, mlx-lm). Path is configurable in Settings.
+- `engine/server.py` is bundled into the Mac app; the app launches it on demand on port 8765 and
+  calls /shutdown when work is done. Log: `~/Library/Application Support/com.darkopj.vlearning/engine.log`.
+- The Mac app is **not sandboxed** (needed to run Python and read the Hugging Face cache).
+
 ## Build order
 1. Engine + benchmark (done: `engine/server.py`, `engine/bench.py`). Benchmark not yet run on the Mac.
 2. Xcode multiplatform project, library, design system

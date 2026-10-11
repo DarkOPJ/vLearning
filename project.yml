@@ -67,10 +67,14 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - vLearning
+      # The Python engine ships inside the Mac app; the app runs it on demand.
+      - path: engine/server.py
+        buildPhase: resources
     entitlements:
       path: vLearning/macOS.entitlements
       properties:
-        com.apple.security.app-sandbox: true
+        # Off: the app launches the local Python engine and reads the Hugging Face model cache.
+        com.apple.security.app-sandbox: false
         com.apple.security.files.user-selected.read-write: true
         com.apple.security.network.client: true
     settings:

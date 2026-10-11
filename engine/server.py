@@ -1,4 +1,4 @@
-"""vLearning TTS engine.
+"""vLearning engine: TTS (Breeze) and text cleanup (S1-mini).
 
 A small local HTTP service that loads a TTS model on demand, synthesizes one
 sentence at a time, and fully unloads when told to. The app starts this process
@@ -13,7 +13,8 @@ Endpoints (all JSON unless noted):
   POST /load        {"model"?}                       -> {"loaded": true, "seconds"}
   POST /synthesize  {"text", "instruct"?, "voice"?, "speed"?}
                     -> audio/wav body; headers X-Audio-Duration, X-Gen-Seconds
-  POST /unload      -> {"loaded": false}
+  POST /normalize   {"text", "styling"?}             -> {"text", "seconds"}
+  POST /unload      -> {"loaded": false}   (unloads every model)
   POST /shutdown    -> unloads, then exits the process
 """
 
@@ -34,8 +35,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import numpy as np
 
 DEFAULT_MODEL = "mlx-community/Breeze-TTS-2-mlx-8bit"
+DEFAULT_NORMALIZER = "mlx-community/S1-mini-MLX-8bit"
 DEFAULT_INSTRUCT = "A calm, warm male narrator with a clear, steady pace, like an audiobook reader."
 MAX_TEXT_CHARS = 2000
+MAX_NORMALIZE_CHARS = 200_000
+NORMALIZE_CHUNK_CHARS = 2500  # S1-mini is trained on inputs up to ~1000 tokens
+
+# S1-mini's input format: this exact system prompt, then a control line. See the model card.
+S1_SYSTEM = (
+    "You are a text normalizer for speech-to-text transcripts. The input begins "
+    "with a control line specifying the styling, structure, and context settings; "
+    "clean the transcript to match those settings and output only the cleaned text."
+)
+S1_STYLINGS = {"casual", "semi-casual", "semi-formal", "formal"}
 
 
 # --------------------------------------------------------------------------- backends
@@ -77,14 +89,7 @@ class MLXBackend:
 
     def unload(self) -> None:
         self.model = None
-        gc.collect()
-        try:
-            import mlx.core as mx
-
-            clear = getattr(mx, "clear_cache", None) or mx.metal.clear_cache
-            clear()
-        except Exception:
-            pass
+        _release_mlx_memory()
 
 
 class FakeBackend:
@@ -113,6 +118,93 @@ class FakeBackend:
         self._loaded = False
 
 
+class S1Backend:
+    """S1-mini text normalizer via mlx-lm."""
+
+    def __init__(self, model_id: str):
+        self.model_id = model_id
+        self.model = None
+        self.tokenizer = None
+
+    @property
+    def loaded(self) -> bool:
+        return self.model is not None
+
+    def load(self) -> None:
+        if self.model is not None:
+            return
+        from mlx_lm import load
+
+        self.model, self.tokenizer = load(self.model_id)
+
+    def normalize(self, text: str, styling: str) -> str:
+        from mlx_lm import generate
+
+        control = f"[Styling: {styling}] [Structure: prose] [Context: general]"
+        messages = [
+            {"role": "system", "content": S1_SYSTEM},
+            {"role": "user", "content": f"{control}\n{text}"},
+        ]
+        prompt = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+        )
+        # Card guidance: max_new_tokens ~ 1.3 x input tokens + 32.
+        max_tokens = int(len(self.tokenizer.encode(text)) * 1.3) + 32
+        return generate(self.model, self.tokenizer, prompt=prompt, max_tokens=max_tokens, verbose=False).strip()
+
+    def unload(self) -> None:
+        self.model = None
+        self.tokenizer = None
+        _release_mlx_memory()
+
+
+class FakeNormalizer:
+    model_id = "fake-normalizer"
+
+    def __init__(self, *_):
+        self._loaded = False
+
+    @property
+    def loaded(self) -> bool:
+        return self._loaded
+
+    def load(self) -> None:
+        self._loaded = True
+
+    def normalize(self, text: str, styling: str) -> str:
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        return "\n".join(l[0].upper() + l[1:] + ("" if l[-1] in ".!?" else ".") for l in lines)
+
+    def unload(self) -> None:
+        self._loaded = False
+
+
+def _release_mlx_memory() -> None:
+    gc.collect()
+    try:
+        import mlx.core as mx
+
+        clear = getattr(mx, "clear_cache", None) or mx.metal.clear_cache
+        clear()
+    except Exception:
+        pass
+
+
+def chunk_text(text: str, limit: int = NORMALIZE_CHUNK_CHARS) -> list[str]:
+    """Splits at line boundaries into chunks under `limit` chars (a longer single line stays whole)."""
+    chunks, current = [], []
+    size = 0
+    for line in text.splitlines():
+        if current and size + len(line) > limit:
+            chunks.append("\n".join(current))
+            current, size = [], 0
+        current.append(line)
+        size += len(line) + 1
+    if current:
+        chunks.append("\n".join(current))
+    return [c for c in chunks if c.strip()]
+
+
 def _filter_kwargs(fn, kwargs: dict) -> dict:
     """Drop kwargs a model's generate() does not accept (models differ)."""
     try:
@@ -139,20 +231,36 @@ def to_wav_bytes(audio: np.ndarray, sample_rate: int) -> bytes:
 
 
 class Engine:
-    """Holds the backend and guarantees one generation at a time."""
+    """Holds the models and guarantees one job at a time, with only one model in memory."""
 
-    def __init__(self, backend):
+    def __init__(self, backend, normalizer):
         self.backend = backend
-        self.lock = threading.Lock()  # serializes load / synthesize / unload
+        self.normalizer = normalizer
+        self.lock = threading.Lock()  # serializes load / synthesize / normalize / unload
         self.busy = False
 
     def health(self) -> dict:
         return {
             "status": "ok",
             "loaded": self.backend.loaded,
+            "normalizer_loaded": self.normalizer.loaded,
             "busy": self.busy,
             "model": self.backend.model_id,
+            "normalizer": self.normalizer.model_id,
         }
+
+    def normalize(self, text: str, styling: str):
+        with self.lock:
+            self.busy = True
+            try:
+                if self.backend.loaded:
+                    self.backend.unload()  # keep only one model in memory
+                self.normalizer.load()
+                start = time.perf_counter()
+                out = "\n".join(self.normalizer.normalize(c, styling) for c in chunk_text(text))
+                return out, time.perf_counter() - start
+            finally:
+                self.busy = False
 
     def load(self) -> float:
         with self.lock:
@@ -164,6 +272,8 @@ class Engine:
         with self.lock:
             self.busy = True
             try:
+                if self.normalizer.loaded:
+                    self.normalizer.unload()  # keep only one model in memory
                 self.backend.load()  # no-op if already loaded
                 start = time.perf_counter()
                 audio, sr = self.backend.synthesize(text, instruct, voice, speed)
@@ -174,6 +284,7 @@ class Engine:
     def unload(self) -> None:
         with self.lock:
             self.backend.unload()
+            self.normalizer.unload()
 
 
 # --------------------------------------------------------------------------- http
@@ -235,6 +346,18 @@ def make_handler(engine: Engine, server_ref: dict):
                     self.wfile.write(body)
                     return
 
+                if self.path == "/normalize":
+                    text = data.get("text") or ""
+                    if len(text) > MAX_NORMALIZE_CHARS:
+                        return self._json(400, {"error": f"text over {MAX_NORMALIZE_CHARS} chars"})
+                    styling = data.get("styling") or "formal"
+                    if styling not in S1_STYLINGS:
+                        return self._json(400, {"error": f"styling must be one of {sorted(S1_STYLINGS)}"})
+                    if not text.strip():
+                        return self._json(200, {"text": "", "seconds": 0})
+                    out, seconds = engine.normalize(text, styling)
+                    return self._json(200, {"text": out, "seconds": round(seconds, 3)})
+
                 if self.path == "/unload":
                     engine.unload()
                     return self._json(200, {"loaded": False})
@@ -257,12 +380,14 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--normalizer", default=DEFAULT_NORMALIZER)
     parser.add_argument("--preload", action="store_true", help="load the model at startup")
     parser.add_argument("--fake", action="store_true", help="sine-wave backend for testing")
     args = parser.parse_args()
 
     backend = FakeBackend() if args.fake else MLXBackend(args.model)
-    engine = Engine(backend)
+    normalizer = FakeNormalizer() if args.fake else S1Backend(args.normalizer)
+    engine = Engine(backend, normalizer)
     if args.preload:
         engine.load()
 

@@ -4,6 +4,10 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("defaultSpeed") private var defaultSpeed: Double = 1.0
     @AppStorage("normalizerEnabled") private var normalizerEnabled: Bool = true
+    @AppStorage("normalizerStyling") private var normalizerStyling: String = "formal"
+    #if os(macOS)
+    @AppStorage(EngineController.pythonPathKey) private var pythonPath: String = EngineController.defaultPythonPath
+    #endif
     @AppStorage("breezeInstruct") private var breezeInstruct: String =
         "A calm, warm male narrator with a clear, steady pace, like an audiobook reader."
 
@@ -23,11 +27,34 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Toggle("Text normalizer (S1-mini)", isOn: $normalizerEnabled)
+                    Toggle("Clean up with S1-mini", isOn: $normalizerEnabled)
+                    if normalizerEnabled {
+                        Picker("Style", selection: $normalizerStyling) {
+                            Text("Formal").tag("formal")
+                            Text("Semi-formal").tag("semi-formal")
+                        }
+                    }
+                } header: {
+                    Text("Text cleanup")
                 } footer: {
-                    Text("Cleans up punctuation and formatting before generating speech. Disable if it changes the wording of your documents.")
+                    Text("Adds punctuation and fixes broken lines before speech. Runs on the Mac. Turn off if it changes the wording of your documents.")
                         .font(.caption)
                 }
+
+                #if os(macOS)
+                Section {
+                    TextField("Python", text: $pythonPath)
+                        .font(.system(.callout, design: .monospaced))
+                        .textFieldStyle(.roundedBorder)
+                    Button("Reset to Default") { pythonPath = EngineController.defaultPythonPath }
+                        .disabled(pythonPath == EngineController.defaultPythonPath)
+                } header: {
+                    Text("Engine")
+                } footer: {
+                    Text("The Python environment with mlx-audio and mlx-lm. The engine starts only while preparing or generating, and stops afterwards.")
+                        .font(.caption)
+                }
+                #endif
 
                 Section("Voice (Breeze — Mac only)") {
                     VStack(alignment: .leading, spacing: DS.Space.s) {

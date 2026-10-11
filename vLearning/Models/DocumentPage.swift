@@ -9,7 +9,7 @@ final class DocumentPage {
     var tablesText: String           // stringified table content
     var ocrText: String              // text from user-selected images, in image order
     var isLikelyScanned: Bool        // PDF page with almost no selectable text
-    var sentences: [String]          // split by the sentence splitter in step 5
+    var sentences: [String]          // what will be read, one TTS request each
     var imageFilePaths: [String]     // extracted images, relative to the document's storage folder
     var previewImagePath: String?    // rendered page (PDF), relative to the document's storage folder
     var selectedImageIndices: [Int]  // unused; superseded by ocrSelectedPaths
@@ -24,6 +24,10 @@ final class DocumentPage {
     var editedNotes: String?
     var editedTables: String?
     var isSkipped: Bool = false      // user chose not to read this page at all
+
+    // Prepared for reading (S1-mini + sentence splitting).
+    var preparedFrom: String?        // readableText the sentences were made from
+    var preparedWithS1: Bool = false
 
     var document: VLDocument?
 
@@ -115,6 +119,10 @@ final class DocumentPage {
     }
 
     var hasAudio: Bool { audioFilePath != nil }
+
+    var isPrepared: Bool { preparedFrom != nil }
+    /// Prepared, but the text was edited (or OCR changed) afterwards.
+    var isPreparedStale: Bool { preparedFrom.map { $0 != readableText } ?? false }
 
     init(pageIndex: Int, extractedText: String = "") {
         self.pageIndex = pageIndex

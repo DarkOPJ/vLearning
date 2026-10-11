@@ -12,11 +12,15 @@ struct DocumentPagesView: View {
     @State private var enlargedImage: URL?
     @State private var showOCR = false
     @State private var showCleanUp = false
+    @State private var showPrepare = false
 
     enum Mode: String, CaseIterable, Identifiable {
-        case text = "Text", original = "Original"
+        case text = "Text", sentences = "Sentences", original = "Original"
         var id: Self { self }
     }
+
+    /// Original is only available for PDFs (rendered pages).
+    private var modes: [Mode] { document.kind == .pdf ? Mode.allCases : [.text, .sentences] }
 
     private var sortedPages: [DocumentPage] {
         document.pages.sorted { $0.pageIndex < $1.pageIndex }
@@ -38,7 +42,7 @@ struct DocumentPagesView: View {
                         page: page,
                         documentId: document.id,
                         title: "\(pageNoun) \(page.pageIndex + 1)",
-                        showOriginal: mode == .original,
+                        mode: mode,
                         onImageTap: { enlargedImage = $0 }
                     )
                 }
@@ -57,14 +61,18 @@ struct DocumentPagesView: View {
         #endif
         .navigationTitle(document.title)
         .toolbar {
-            if document.kind == .pdf {
-                ToolbarItem(placement: .principal) {
-                    Picker("View", selection: $mode) {
-                        ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 200)
+            ToolbarItem(placement: .principal) {
+                Picker("View", selection: $mode) {
+                    ForEach(modes) { Text($0.rawValue).tag($0) }
                 }
+                .pickerStyle(.segmented)
+                .frame(width: document.kind == .pdf ? 270 : 180)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button { showPrepare = true } label: {
+                    Label("Prepare", systemImage: "text.badge.checkmark")
+                }
+                .help("Clean up with S1-mini and split into sentences")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button { showCleanUp = true } label: {
@@ -92,6 +100,9 @@ struct DocumentPagesView: View {
         .quickLookPreview($quickLookURL)
         .navigationDestination(isPresented: $showCleanUp) {
             CleanUpView(document: document)
+        }
+        .sheet(isPresented: $showPrepare) {
+            PrepareView(document: document) { mode = .sentences }
         }
         .sheet(isPresented: $showOCR) {
             OCRSelectionView(document: document)
@@ -163,7 +174,7 @@ private struct PageCard: View {
     let page: DocumentPage
     let documentId: UUID
     let title: String
-    let showOriginal: Bool
+    let mode: DocumentPagesView.Mode
     let onImageTap: (URL) -> Void
 
     @State private var isEditing = false
@@ -179,7 +190,9 @@ private struct PageCard: View {
             Group {
                 if isEditing {
                     editContent
-                } else if showOriginal, let preview = page.previewImagePath {
+                } else if mode == .sentences {
+                    sentencesContent
+                } else if mode == .original, let preview = page.previewImagePath {
                     StoredImage(url: url(preview), maxPixelSize: 1600)
                         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
                         .onTapGesture { onImageTap(url(preview)) }
@@ -195,6 +208,34 @@ private struct PageCard: View {
         .cardStyle()
         .animation(.easeInOut(duration: 0.2), value: page.isSkipped)
         .animation(.easeInOut(duration: 0.2), value: isEditing)
+    }
+
+    /// The prepared sentences, numbered, exactly as they'll be read.
+    @ViewBuilder
+    private var sentencesContent: some View {
+        if page.isSkipped {
+            Text("Skipped.").font(.callout).italic().foregroundStyle(.secondary)
+        } else if !page.isPrepared {
+            Text("Not prepared yet. Use Prepare to clean up the text and split it into sentences.")
+                .font(.callout).italic().foregroundStyle(.secondary)
+        } else if page.sentences.isEmpty {
+            Text("Nothing to read on this page.").font(.callout).italic().foregroundStyle(.secondary)
+        } else {
+            VStack(alignment: .leading, spacing: DS.Space.s) {
+                ForEach(Array(page.sentences.enumerated()), id: \.offset) { i, sentence in
+                    HStack(alignment: .firstTextBaseline, spacing: DS.Space.m) {
+                        Text("\(i + 1)")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.tertiary)
+                            .frame(width: 22, alignment: .trailing)
+                        Text(sentence)
+                            .font(.body)
+                            .lineSpacing(3)
+                            .textSelection(.enabled)
+                    }
+                }
+            }
+        }
     }
 
     /// Inline editors for each section, the same ones Clean Up uses.
@@ -268,6 +309,11 @@ private struct PageCard: View {
     @ViewBuilder
     private var tags: some View {
         HStack(spacing: DS.Space.s) {
+            if page.isPreparedStale {
+                Tag(text: "Changed", systemImage: "arrow.triangle.2.circlepath", color: .orange)
+            } else if page.isPrepared && !page.isSkipped {
+                Tag(text: page.preparedWithS1 ? "S1" : "Ready", systemImage: "checkmark", color: .green)
+            }
             if !page.cleanText(.ocr).isEmpty { Tag(text: "OCR", systemImage: "text.viewfinder", color: .green) }
             if page.isLikelyScanned { Tag(text: "Scanned", systemImage: "doc.viewfinder", color: .orange) }
             if !page.cleanText(.notes).isEmpty { Tag(text: "Notes", systemImage: "note.text", color: .purple) }
