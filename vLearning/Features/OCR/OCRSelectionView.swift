@@ -12,7 +12,7 @@ struct OCRSelectionView: View {
     @State private var done = 0
     @State private var total = 0
     @State private var failures = 0
-    @State private var showHidden = false
+    @State private var hiddenExpanded = true
 
     private var pages: [DocumentPage] {
         document.pages
@@ -20,14 +20,21 @@ struct OCRSelectionView: View {
             .sorted { $0.pageIndex < $1.pageIndex }
     }
 
-    /// Candidates shown in the grid: hidden images are left out unless "Show Hidden" is on.
     private func visibleCandidates(_ page: DocumentPage) -> [String] {
-        showHidden ? page.ocrCandidates : page.ocrCandidates.filter { !page.hiddenOCRPaths.contains($0) }
+        page.ocrCandidates.filter { !page.hiddenOCRPaths.contains($0) }
+    }
+
+    /// Hidden images in on-page order (ignores stale paths no longer on the page).
+    private func hiddenCandidates(_ page: DocumentPage) -> [String] {
+        page.ocrCandidates.filter { page.hiddenOCRPaths.contains($0) }
     }
 
     private var visiblePages: [DocumentPage] { pages.filter { !visibleCandidates($0).isEmpty } }
+    private var hiddenPages: [DocumentPage] { pages.filter { !hiddenCandidates($0).isEmpty } }
     private var allVisible: [String] { visiblePages.flatMap(visibleCandidates) }
-    private var hiddenCount: Int { pages.reduce(0) { $0 + $1.hiddenOCRPaths.count } }
+    private var hiddenCount: Int { pages.reduce(0) { $0 + hiddenCandidates($1).count } }
+
+    private let columns = [GridItem(.adaptive(minimum: 160, maximum: 240), spacing: DS.Space.m)]
     private var hadSelection: Bool { pages.contains { !$0.ocrSelectedPaths.isEmpty } }
     private var pageNoun: String { document.kind == .pptx ? "Slide" : "Page" }
     private var isRunning: Bool { running != nil }
@@ -80,14 +87,16 @@ struct OCRSelectionView: View {
                 ForEach(visiblePages) { page in
                     VStack(alignment: .leading, spacing: DS.Space.m) {
                         Text("\(pageNoun) \(page.pageIndex + 1)").sectionHeaderStyle()
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160, maximum: 240), spacing: DS.Space.m)],
-                                  alignment: .leading,
-                                  spacing: DS.Space.m) {
+                        LazyVGrid(columns: columns, alignment: .leading, spacing: DS.Space.m) {
                             ForEach(visibleCandidates(page), id: \.self) { path in
                                 tile(path: path, page: page)
                             }
                         }
                     }
+                }
+
+                if hiddenCount > 0 {
+                    hiddenSection
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -96,11 +105,86 @@ struct OCRSelectionView: View {
         .disabled(isRunning)
     }
 
+    /// Hidden images, per page, each with its own unhide button.
+    private var hiddenSection: some View {
+        VStack(alignment: .leading, spacing: DS.Space.l) {
+            Divider()
+            HStack {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { hiddenExpanded.toggle() }
+                } label: {
+                    HStack(spacing: DS.Space.s) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .bold))
+                            .rotationEffect(.degrees(hiddenExpanded ? 90 : 0))
+                        Image(systemName: "eye.slash")
+                        Text("Hidden Images (\(hiddenCount))")
+                            .font(.headline)
+                    }
+                    .foregroundStyle(.secondary)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                Button("Unhide All") {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        for page in pages { page.hiddenOCRPaths.removeAll() }
+                    }
+                }
+                .buttonStyle(.borderless)
+            }
+
+            if hiddenExpanded {
+                ForEach(hiddenPages) { page in
+                    VStack(alignment: .leading, spacing: DS.Space.m) {
+                        Text("\(pageNoun) \(page.pageIndex + 1)").sectionHeaderStyle()
+                        LazyVGrid(columns: columns, alignment: .leading, spacing: DS.Space.m) {
+                            ForEach(hiddenCandidates(page), id: \.self) { path in
+                                hiddenTile(path: path, page: page)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.top, DS.Space.s)
+    }
+
+    private func hiddenTile(path: String, page: DocumentPage) -> some View {
+        let shape = RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
+        return Button {
+            toggleHidden(path, on: page)
+        } label: {
+            Color.secondary.opacity(0.10)
+                .frame(height: 110)
+                .frame(maxWidth: .infinity)
+                .overlay {
+                    StoredImage(url: DocumentStorage.url(for: document.id, relativePath: path),
+                                maxPixelSize: 400, contentMode: .fill)
+                        .opacity(0.4)
+                        .saturation(0)
+                }
+                .clipShape(shape)
+                .overlay {
+                    Label("Unhide", systemImage: "eye")
+                        .font(.system(.caption, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DS.Space.m)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.6), in: Capsule())
+                }
+                .overlay { shape.strokeBorder(Color.secondary.opacity(0.25), lineWidth: 1) }
+                .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .help("Show this image again")
+        .accessibilityLabel("Unhide image")
+    }
+
     private func tile(path: String, page: DocumentPage) -> some View {
         let isSelected = selected.contains(path)
         let isWholePage = path == page.previewImagePath
         let hasResult = page.ocrResults[path] != nil
-        let isHidden = page.hiddenOCRPaths.contains(path)
         let shape = RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
 
         return Button {
@@ -133,7 +217,6 @@ struct OCRSelectionView: View {
                     shape.strokeBorder(isSelected ? Color.accentColor : Color.secondary.opacity(0.25),
                                        lineWidth: isSelected ? 3 : 1)
                 }
-                .opacity(isHidden ? 0.45 : 1)
                 .contentShape(shape)
         }
         .buttonStyle(.plain)
@@ -141,7 +224,7 @@ struct OCRSelectionView: View {
             Button {
                 toggleHidden(path, on: page)
             } label: {
-                Image(systemName: isHidden ? "eye" : "eye.slash")
+                Image(systemName: "eye.slash")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 26, height: 26)
@@ -149,8 +232,8 @@ struct OCRSelectionView: View {
             }
             .buttonStyle(.plain)
             .padding(DS.Space.s)
-            .help(isHidden ? "Show this image" : "Hide this image")
-            .accessibilityLabel(isHidden ? "Show image" : "Hide image")
+            .help("Hide this image")
+            .accessibilityLabel("Hide image")
         }
         .accessibilityLabel(isWholePage ? "Whole page" : "Image")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -181,14 +264,6 @@ struct OCRSelectionView: View {
                     if allSelected { selected.subtract(allVisible) } else { selected.formUnion(allVisible) }
                 }
                 .disabled(isRunning || allVisible.isEmpty)
-            }
-        }
-        if hiddenCount > 0 || showHidden {
-            ToolbarItem(placement: .secondaryAction) {
-                Toggle(isOn: $showHidden.animation()) {
-                    Label("Show Hidden (\(hiddenCount))", systemImage: "eye")
-                }
-                .disabled(isRunning)
             }
         }
     }
