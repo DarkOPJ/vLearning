@@ -240,7 +240,7 @@ private struct SectionEditor: View {
                 .lineSpacing(3)
                 .scrollContentBackground(.hidden)
                 .padding(DS.Space.s)
-                .frame(minHeight: 90, idealHeight: idealHeight, maxHeight: 420)
+                .frame(height: editorHeight)
                 .background(Color.secondary.opacity(0.08))
                 .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
         }
@@ -249,9 +249,10 @@ private struct SectionEditor: View {
     }
 
     /// Rough height for the text so short sections don't get a tall empty box.
-    private var idealHeight: CGFloat {
+    /// Always within 90...420; longer text scrolls inside the editor.
+    private var editorHeight: CGFloat {
         let text = page.cleanText(section)
         let lines = text.components(separatedBy: "\n").reduce(0) { $0 + max(1, $1.count / 80 + 1) }
-        return CGFloat(min(max(lines, 3), 20)) * 22 + 16
+        return min(max(CGFloat(lines) * 22 + 16, 90), 420)
     }
 }
