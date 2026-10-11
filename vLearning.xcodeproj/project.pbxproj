@@ -48,6 +48,7 @@
 		809B0A879583C2ED04710245 /* ImageCoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1B1C7A7A1BEAE85B0F43A9 /* ImageCoding.swift */; };
 		82925E7DDA93006F0E3DA712 /* PrepareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A917CB5B6716C3E333C69E26 /* PrepareView.swift */; };
 		87B6177E7A1CA8BBE79715B7 /* EngineController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5419042AFC5C3BF7BA09F817 /* EngineController.swift */; };
+		8DACA5F76EA31FF622BA2CC4 /* RemoveEverywhereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */; };
 		8DE53B95CF3CCD8EAE690C8A /* ExtractedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF6ED6ABB6B2E383E2F0FDE /* ExtractedPage.swift */; };
 		8E00DED7E3DA2941BCCBFD27 /* EngineController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5419042AFC5C3BF7BA09F817 /* EngineController.swift */; };
 		8E921A85EC3AF0AC18B1ABF5 /* DOCXExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */; };
@@ -63,7 +64,9 @@
 		A4DF12BBE2B709704C8ABAE4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BE3E43E4B7A597063BC3A1 /* RootView.swift */; };
 		ACE9479328ADFBDE230DBB47 /* DOCXExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */; };
 		AF3DE51697551EC078F5FEA5 /* GenerationJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */; };
+		AF41C8A937E998528EB2226F /* TextRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86395D495B5F84BA3BD61953 /* TextRemover.swift */; };
 		B3C6CB8160CD47F876C4995E /* PrepareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A917CB5B6716C3E333C69E26 /* PrepareView.swift */; };
+		B9A2DF82B8B148B25BB1E8A5 /* RemoveEverywhereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */; };
 		BAA40EF97A55203147C386BC /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9781245570BBF21722464DD7 /* StatusBadge.swift */; };
 		BE808A60073512879989F522 /* OCRSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D04A6D2ECA7ACF3AFCB24E /* OCRSelectionView.swift */; };
 		C236C029EBBA24FBB4933045 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
@@ -75,6 +78,7 @@
 		DAA78948117F8560836A208C /* CleanUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */; };
 		DC5DBEF8C91C0262AF70610C /* SectionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D68AD63754DE00CA8DDE7D0 /* SectionEditor.swift */; };
 		DCF6492DE02E091266DFEAE3 /* ReviewPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2DEDC7CBFDC9C1D6C182F3 /* ReviewPlaceholder.swift */; };
+		DEFC7B1AC85125A6449EDA5A /* TextRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86395D495B5F84BA3BD61953 /* TextRemover.swift */; };
 		E16C5F38694AD77BEA6FE9D2 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7F6709524488EE4C96546 /* LibraryView.swift */; };
 		E3CD6792F42F66FB8A60DBC0 /* DocumentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2EEE93B27D7A560D253BCA /* DocumentCard.swift */; };
 		FE1DC33C71709BD41BDAE3A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1786CE1355EE95C4BCCEB56E /* SettingsView.swift */; };
@@ -102,6 +106,7 @@
 		6D0E38F358395F4F6817F6F8 /* DOCXExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DOCXExtractor.swift; sourceTree = "<group>"; };
 		6E78A97C6B5A09D6663046FE /* PPTXExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTXExtractor.swift; sourceTree = "<group>"; };
 		749416CE3C531FEDB120AEC0 /* server.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = server.py; sourceTree = "<group>"; };
+		86395D495B5F84BA3BD61953 /* TextRemover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRemover.swift; sourceTree = "<group>"; };
 		8F13A9B83F506E213B265D56 /* OOXMLTextParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OOXMLTextParser.swift; sourceTree = "<group>"; };
 		9781245570BBF21722464DD7 /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBadge.swift; sourceTree = "<group>"; };
 		9A7955978F50C31F148A4B56 /* vLearning_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vLearning_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +114,7 @@
 		9D37EBC98D2DBF67165800F7 /* GenerationJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationJob.swift; sourceTree = "<group>"; };
 		9D47A55D915539711D181568 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		A5C7A71823CB6C66FEC74001 /* DocumentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStorage.swift; sourceTree = "<group>"; };
+		A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveEverywhereView.swift; sourceTree = "<group>"; };
 		A917CB5B6716C3E333C69E26 /* PrepareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareView.swift; sourceTree = "<group>"; };
 		B55250C56079A65D7AFCCDD1 /* vLearning_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = vLearning_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE84ABEA97C9FEF8FF11086A /* VLDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VLDocument.swift; sourceTree = "<group>"; };
@@ -240,6 +246,7 @@
 			isa = PBXGroup;
 			children = (
 				273923D71BA0D9EDD97A0B07 /* CleanUpView.swift */,
+				A864CBBAC60731CE1C2ED2A5 /* RemoveEverywhereView.swift */,
 				1D68AD63754DE00CA8DDE7D0 /* SectionEditor.swift */,
 			);
 			path = CleanUp;
@@ -266,6 +273,7 @@
 			children = (
 				4B84DB808A90C1AA8AF71A30 /* DocumentPreparer.swift */,
 				E1DC7E53DF4FE3A49A4861C8 /* SentenceSplitter.swift */,
+				86395D495B5F84BA3BD61953 /* TextRemover.swift */,
 			);
 			path = Text;
 			sourceTree = "<group>";
@@ -476,6 +484,7 @@
 				319C4C649968796967952EDA /* PPTXExtractor.swift in Sources */,
 				B3C6CB8160CD47F876C4995E /* PrepareView.swift in Sources */,
 				4815373E3A126EE832851E72 /* ReaderPlaceholder.swift in Sources */,
+				B9A2DF82B8B148B25BB1E8A5 /* RemoveEverywhereView.swift in Sources */,
 				DCF6492DE02E091266DFEAE3 /* ReviewPlaceholder.swift in Sources */,
 				6B4AB08CCADC24C7AD73C533 /* RootView.swift in Sources */,
 				DC5DBEF8C91C0262AF70610C /* SectionEditor.swift in Sources */,
@@ -484,6 +493,7 @@
 				BAA40EF97A55203147C386BC /* StatusBadge.swift in Sources */,
 				52974BAABFDC871FC4CFE56F /* StoredImage.swift in Sources */,
 				11A2F155538B244764C6AA9B /* TextRecognizer.swift in Sources */,
+				AF41C8A937E998528EB2226F /* TextRemover.swift in Sources */,
 				5B5C51CEFFC2185748BB9AF5 /* VLDocument.swift in Sources */,
 				6DB1D7D28766271A1718DA8A /* ZIPReader.swift in Sources */,
 				A15B3D06319940012304B67C /* vLearningApp.swift in Sources */,
@@ -517,6 +527,7 @@
 				48F3D698F3F455728AA695E8 /* PPTXExtractor.swift in Sources */,
 				82925E7DDA93006F0E3DA712 /* PrepareView.swift in Sources */,
 				95E5BCF322C2D18FFCD9075C /* ReaderPlaceholder.swift in Sources */,
+				8DACA5F76EA31FF622BA2CC4 /* RemoveEverywhereView.swift in Sources */,
 				07067AD391587C2BCE37EEFB /* ReviewPlaceholder.swift in Sources */,
 				A4DF12BBE2B709704C8ABAE4 /* RootView.swift in Sources */,
 				3CBC0042541E54D3F7120B57 /* SectionEditor.swift in Sources */,
@@ -525,6 +536,7 @@
 				39A761E42604ADE6DB085DD4 /* StatusBadge.swift in Sources */,
 				46C7CA6ACA68EBF9A673070F /* StoredImage.swift in Sources */,
 				1F9EA11D335FF21C10F38C03 /* TextRecognizer.swift in Sources */,
+				DEFC7B1AC85125A6449EDA5A /* TextRemover.swift in Sources */,
 				1A0F8D038AECFB73277B9E5D /* VLDocument.swift in Sources */,
 				58050246CB4226CE69879E81 /* ZIPReader.swift in Sources */,
 				049AD101A293C12FA82AE86F /* vLearningApp.swift in Sources */,

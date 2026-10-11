@@ -13,6 +13,7 @@ struct DocumentPagesView: View {
     @State private var showOCR = false
     @State private var showCleanUp = false
     @State private var showPrepare = false
+    @State private var showRemoveEverywhere = false
 
     enum Mode: String, CaseIterable, Identifiable {
         case text = "Text", sentences = "Sentences", original = "Original"
@@ -75,6 +76,12 @@ struct DocumentPagesView: View {
                 .help("Clean up with S1-mini and split into sentences")
             }
             ToolbarItem(placement: .primaryAction) {
+                Button { showRemoveEverywhere = true } label: {
+                    Label("Remove from All Pages", systemImage: "text.badge.minus")
+                }
+                .help("Remove a piece of text (like a footer) from every page")
+            }
+            ToolbarItem(placement: .primaryAction) {
                 Button { showCleanUp = true } label: {
                     Label("Clean Up", systemImage: "eraser")
                 }
@@ -100,6 +107,9 @@ struct DocumentPagesView: View {
         .quickLookPreview($quickLookURL)
         .navigationDestination(isPresented: $showCleanUp) {
             CleanUpView(document: document)
+        }
+        .sheet(isPresented: $showRemoveEverywhere) {
+            RemoveEverywhereView(document: document)
         }
         .sheet(isPresented: $showPrepare) {
             PrepareView(document: document) { mode = .sentences }

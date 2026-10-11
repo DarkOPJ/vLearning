@@ -10,6 +10,7 @@ struct CleanUpView: View {
     @State private var index = 0
     @State private var showOriginal = false
     @State private var quickLookURL: URL?
+    @State private var showRemoveEverywhere = false
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var sizeClass
     #endif
@@ -49,6 +50,12 @@ struct CleanUpView: View {
         .navigationTitle("Clean Up")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
+                Button { showRemoveEverywhere = true } label: {
+                    Label("Remove from All Pages", systemImage: "text.badge.minus")
+                }
+                .help("Remove a piece of text (like a footer) from every page")
+            }
+            ToolbarItem(placement: .primaryAction) {
                 Button {
                     if document.kind == .pdf {
                         withAnimation(.easeInOut(duration: 0.2)) { showOriginal.toggle() }
@@ -62,6 +69,9 @@ struct CleanUpView: View {
             }
         }
         .quickLookPreview($quickLookURL)
+        .sheet(isPresented: $showRemoveEverywhere) {
+            RemoveEverywhereView(document: document)
+        }
     }
 
     // MARK: - Page content
